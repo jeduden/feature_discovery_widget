@@ -12,14 +12,14 @@ class TestWrapper extends StatelessWidget {
 
   @override
   Widget build(_) => MaterialApp(
-          title: 'FeatureDiscoveryWidget Test',
-          home: Scaffold(
-            appBar: AppBar(
-              title: const Text('TestWidget'),
-            ),
-            body: child,
+        title: 'FeatureDiscoveryWidget Test',
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('TestWidget'),
           ),
-        );
+          body: child,
+        ),
+      );
 }
 
 @visibleForTesting
@@ -48,7 +48,6 @@ class TestIconState extends State<TestIcon> {
       // in order to use pumpAndSettle in tests.
       // Otherwise, the tester can never settle as it requires frame sync.
       enablePulsingAnimation: false,
-      allowShowingDuplicate: widget.allowShowingDuplicate,
       child: icon,
       tapTarget: icon,
       title: const Text('This is it'),
@@ -67,26 +66,28 @@ class OverflowingDescriptionFeature extends StatelessWidget {
   final String? featureId;
   final IconData? icon;
 
-  final void Function(BuildContext context)? onContext;
-  final void Function()? onDismiss;
+  final void Function(String)? onDismiss;
+  final void Function(String)? onComplete;
+  final void Function(String)? onFinishedOpening;
+  final void Function(String)? onFinishedClosing;
 
   final OverflowMode? mode;
 
   const OverflowingDescriptionFeature({
     Key? key,
-    this.onContext,
     this.featureId,
     this.icon,
     this.mode,
     this.onDismiss,
+    this.onComplete,
+    this.onFinishedOpening,
+    this.onFinishedClosing,
   }) : super(key: key);
 
   @override
   Widget build(_) => TestWrapper(
         child: Builder(
           builder: (context) {
-            onContext!(context);
-
             return Stack(
               children: <Widget>[
                 Align(
@@ -102,9 +103,11 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                     contentLocation: ContentLocation.below,
                     enablePulsingAnimation: false,
                     overflowMode: mode!,
-                    onDismiss: () async {
-                      onDismiss?.call();
-                    },
+                    initiallyShown: true,
+                    onDismiss: onDismiss,
+                    onComplete: onComplete,
+                    onFinishedClosing: onFinishedClosing,
+                    onFinishedOpening: onFinishedOpening,
                     child: Container(
                       width: 1e2,
                       height: 1e2,
@@ -172,7 +175,6 @@ class WidgetWithDisposableFeatureState
             if (_showDisposableFeature)
               DescribedFeatureOverlay(
                 featureId: widget.featureId,
-                allowShowingDuplicate: false,
                 enablePulsingAnimation: false,
                 title: Text(widget.disposableFeatureTitle),
                 tapTarget: Icon(widget.featureIcon),
@@ -180,7 +182,6 @@ class WidgetWithDisposableFeatureState
               ),
             DescribedFeatureOverlay(
               featureId: widget.featureId,
-              allowShowingDuplicate: false,
               enablePulsingAnimation: false,
               title: Text(widget.staticFeatureTitle),
               tapTarget: Icon(widget.featureIcon),

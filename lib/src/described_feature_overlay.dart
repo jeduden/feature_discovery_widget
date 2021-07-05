@@ -9,11 +9,12 @@ import 'package:feature_discovery_widget/src/enums.dart';
 import 'package:feature_discovery_widget/src/background_content_layout.dart';
 import 'package:feature_discovery_widget/src/content.dart';
 import 'package:feature_discovery_widget/src/center_about.dart';
+import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 import 'package:feature_discovery_widget/src/anchored_overlay.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
-  /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
+  /// This id must be unique among all the [DescribedFeatureOverlay] widgets.
   final String featureId;
 
   /// The color of the large circle, where the text sits on.
@@ -55,23 +56,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   final Widget child;
   final ContentLocation contentLocation;
-  final bool enablePulsingAnimation;
-
-  /// Called after the opening animation finished
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onFinishedOpening;
-
-  /// Called whenever the user taps outside the overlay area.
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onDismiss;
-
-  /// Called when the tap target is tapped.
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onComplete;
-
-  /// Called after the closing animation finished
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onFinishedClosing;
 
   /// Controls what happens with content that overflows the background's area.
   ///
@@ -88,21 +72,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
   ///  * [OverflowMode], which has explanations for the different modes.
   final OverflowMode overflowMode;
 
-  /// Duration for overlay open animation.
-  final Duration openDuration;
-
-  /// Duration for target pulse animation.
-  final Duration pulseDuration;
-
-  /// Duration for overlay complete animation.
-  final Duration completeDuration;
-
-  /// Duration for overlay dismiss animation.
-  final Duration dismissDuration;
-
-  /// Shows the overlay initially
-  final bool initiallyShown;
-
   /// Controls whether the overlay should be dismissed on touching outside or not.
   ///
   /// The default value for [barrierDismissible] is `true`.
@@ -118,33 +87,15 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.description,
     required this.child,
     required this.tapTarget,
-    this.onFinishedOpening,
-    this.onFinishedClosing,
-    this.onComplete,
-    this.onDismiss,
-    this.initiallyShown = false,
     this.contentLocation = ContentLocation.trivial,
-    this.enablePulsingAnimation = true,
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
-    this.openDuration = const Duration(milliseconds: 250),
-    this.pulseDuration = const Duration(milliseconds: 1000),
-    this.completeDuration = const Duration(milliseconds: 250),
-    this.dismissDuration = const Duration(milliseconds: 250),
     this.barrierDismissible = true,
-  })  : assert(
-          barrierDismissible == true || onDismiss == null,
-          'Cannot provide both a barrierDismissible and onDismiss function\n'
-          'The onDismiss function will never get executed when barrierDismissible is set to false.',
-        ),
-        super(key: key);
+  })  : super(key: key);
 
   @override
   _DescribedFeatureOverlayState createState() {
     final state = _DescribedFeatureOverlayState();
-    if(initiallyShown) {
-      state.postShow();
-    }
     return state;
   }
   
@@ -179,6 +130,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   late AnimationController _completeController;
   late AnimationController _dismissController;
 
+  FeatureOverlayConfig get config => FeatureOverlayConfig.of(context);
+
   @override
   void initState() {
     _state = FeatureOverlayState.closed;
@@ -192,22 +145,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   @override
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
+    _openController.duration = config.openDuration;
+    _pulseController.duration = config.pulseDuration;
+    _completeController.duration = config.completeDuration;
+    _dismissController.duration = config.dismissDuration;
     super.didChangeDependencies();
   }
-
-  @override
-  void didUpdateWidget(DescribedFeatureOverlay oldWidget) {
-    if (oldWidget.enablePulsingAnimation != widget.enablePulsingAnimation) {
-      if (widget.enablePulsingAnimation) {
-        _pulseController.forward(from: 0);
-      } else {
-        _pulseController.stop();
-        setState(() => _transitionProgress = 0);
-      }
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
+  
   @override
   void dispose() {
     _openController.dispose();
@@ -219,29 +163,29 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
 
   void _initAnimationControllers() {
     _openController = AnimationController(
-        vsync: this, duration: widget.openDuration)
+        vsync: this, duration: Duration(seconds: 1))
       ..addListener(
           () => setState(() => _transitionProgress = _openController.value));
 
     _pulseController = AnimationController(
-        vsync: this, duration: widget.pulseDuration)
+        vsync: this, duration: Duration(seconds: 1))
       ..addListener(
           () => setState(() => _transitionProgress = _pulseController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.completed) {
+          if (status == AnimationStatus.completed && config.enablePulsingAnimation) {
             _pulseController.forward(from: 0);
           }
         },
       );
 
     _completeController =
-        AnimationController(vsync: this, duration: widget.completeDuration)
+        AnimationController(vsync: this, duration: Duration(seconds: 1))
           ..addListener(() =>
               setState(() => _transitionProgress = _completeController.value));
 
     _dismissController = AnimationController(
-        vsync: this, duration: widget.dismissDuration)
+        vsync: this, duration: Duration(seconds: 1))
       ..addListener(
           () => setState(() => _transitionProgress = _dismissController.value));
   }
@@ -254,9 +198,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
     // from forward is completed when the animation is complete.
     setState(() => _state = FeatureOverlayState.opened);
 
-    if (widget.enablePulsingAnimation == true) {
-      await _pulseController.forward(from: 0);
-    }
+    await _pulseController.forward(from: 0);
   }
 
   Future<void> _complete() async {
