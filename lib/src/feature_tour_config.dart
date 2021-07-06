@@ -2,28 +2,24 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class FeatureOverlayConfig extends InheritedWidget {
+class FeatureTourConfig extends InheritedWidget {
   /// Enables/Disables the pulsing animation
   /// Disable in tests since the pulse animation does not end.
   final bool enablePulsingAnimation;
 
   /// Called after the opening animation finished
   /// Receives the featureId.
-  final FutureOr<void> Function(String)? onFinishedOpening;
+  final FutureOr<void> Function(String)? onOpen;
 
-  /// Called whenever the user taps outside the overlay area.
+  /// Called whenever the user taps outside the overlay area and dismiss animation is finished
   /// Receives the featureId.
   final FutureOr<void> Function(String)? onDismiss;
 
-  /// Called when the tap target is tapped.
+  /// Called when the tap target is tapped and completion animation is finished
   /// Receives the featureId.
   final FutureOr<void> Function(String)? onComplete;
 
-  /// Called after the closing animation finished
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onFinishedClosing;
-
-  /// Curently active feature
+  /// Currently active feature
   final String? activeFeature;
 
   /// Duration for overlay open animation.
@@ -38,16 +34,15 @@ class FeatureOverlayConfig extends InheritedWidget {
   /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
 
-  const FeatureOverlayConfig({
+  const FeatureTourConfig({
       Key? key,
       required Widget child,
       this.enablePulsingAnimation : true,
-      this.onFinishedOpening,
+      this.onOpen,
       this.onDismiss,
       this.onComplete,
-      this.onFinishedClosing,
       this.activeFeature,
-      this.openDuration : const Duration(milliseconds: 250),
+      this.openDuration : const Duration(milliseconds: 500),
       this.pulseDuration : const Duration(milliseconds: 1000),
       this.completeDuration : const Duration(milliseconds: 250),
       this.dismissDuration : const Duration(milliseconds: 250),
@@ -58,9 +53,9 @@ class FeatureOverlayConfig extends InheritedWidget {
     return true;
   }
 
-  static FeatureOverlayConfig of(BuildContext context) {
-    final FeatureOverlayConfig? result = context.dependOnInheritedWidgetOfExactType<FeatureOverlayConfig>();
-    assert(result != null, 'No FeatureOverlayConfig found in context');
+  static FeatureTourConfig of(BuildContext context) {
+    final FeatureTourConfig? result = context.dependOnInheritedWidgetOfExactType<FeatureTourConfig>();
+    assert(result != null, 'No FeatureTourConfig found in context');
     return result!;
   }
 }

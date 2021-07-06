@@ -126,9 +126,10 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
         matchedRadius += transitionProgress! * 40;
         break;
       case FeatureOverlayState.dismissing:
-        matchedRadius *= 1 - transitionProgress!;
+        matchedRadius *= 0.8 - transitionProgress!;
         break;
       case FeatureOverlayState.opened:
+        matchedRadius *= 0.8;
         break;
       case FeatureOverlayState.closed:
         matchedRadius = 0;

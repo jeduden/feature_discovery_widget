@@ -5,6 +5,9 @@ void main() {
   runApp(MyApp());
 }
 
+const IncrementFeatureId = "Increment";
+
+
 class MyApp extends StatelessWidget {
   final bool disableAnimations;
 
@@ -19,25 +22,25 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page', disableAnimations:disableAnimations),
+      home: FeatureTourWidget(
+        child:MyHomePage(title: 'Flutter Demo Home Page'),
+        features: [IncrementFeatureId],
+        enablePulsingAnimation: !disableAnimations,
+        ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  final bool disableAnimations;
-  MyHomePage({Key? key, required this.title, required this.disableAnimations}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(disableAnimations:disableAnimations);
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  final bool disableAnimations;
-
-  _MyHomePageState({required this.disableAnimations});
 
   void _incrementCounter() {
     setState(() {
@@ -74,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: DescribedFeatureOverlay(
-        featureId: "Increment",
+        featureId: IncrementFeatureId,
         child: buttonBuilder(ValueKey("child"),context),
         tapTarget: Icon(Icons.ac_unit) //buttonBuilder(ValueKey("tap"),context),
       ), // This trailing comma makes auto-formatting nicer for build methods.

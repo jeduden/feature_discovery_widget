@@ -1,15 +1,17 @@
-import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
+import 'package:feature_discovery_widget/src/feature_tour_config.dart';
 import 'package:flutter/material.dart';
 
 class FeatureTourWidget extends StatefulWidget
 {
   Widget child;
   final Iterable<String> features;
+  final bool enablePulsingAnimation;
 
   FeatureTourWidget({
     Key? key,
     required this.child,
     required this.features,
+    this.enablePulsingAnimation = false,
   }) : super(key: key);
 
   @override
@@ -20,19 +22,31 @@ class FeatureTourWidget extends StatefulWidget
 
 class FeatureTourState extends State<FeatureTourWidget>
 {
-  Iterator<String>? featuresIterator;
+  late Iterator<String> featuresIterator;
+  String? active;
 
   @override
   void initState() {
     featuresIterator = widget.features.iterator;
+    _nextActive();
     super.initState();
   }
+
+  void _nextActive()
+  {
+    if(featuresIterator.moveNext())
+      active = featuresIterator.current;
+    else
+      active = null;
+  }
+  
   @override
   Widget build(BuildContext context) {
-    return FeatureOverlayConfig(
-      activeFeature: featuresIterator?.current,
-      onDismiss: (_)=>setState(() { featuresIterator = null; }),
-      onComplete: (_)=>setState(() { featuresIterator?.moveNext(); }),
+    return FeatureTourConfig(
+      enablePulsingAnimation: widget.enablePulsingAnimation,
+      activeFeature: active,
+      onDismiss: (_)=>setState(() { active = null; }),
+      onComplete: (_)=>setState(() { _nextActive(); }),
       child: widget.child,
     );
   }
