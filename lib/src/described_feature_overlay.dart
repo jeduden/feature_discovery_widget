@@ -9,13 +9,17 @@ import 'package:feature_discovery_widget/src/enums.dart';
 import 'package:feature_discovery_widget/src/background_content_layout.dart';
 import 'package:feature_discovery_widget/src/content.dart';
 import 'package:feature_discovery_widget/src/center_about.dart';
-import 'package:feature_discovery_widget/src/feature_tour_config.dart';
+import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 import 'package:feature_discovery_widget/src/anchored_overlay.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
   /// This id must be unique among all the [DescribedFeatureOverlay] widgets.
   final String featureId;
+
+  /// This id identifies the portal where the overlay is displayed.
+  /// Needs to be present in the tree
+  final String portalId;
 
   /// The color of the large circle, where the text sits on.
   /// If null, defaults to [ThemeData.primaryColor].
@@ -80,6 +84,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   DescribedFeatureOverlay({
     Key? key,
     required this.featureId,
+    required this.portalId,
     this.backgroundColor,
     this.targetColor = Colors.white,
     this.textColor = Colors.white,
@@ -108,7 +113,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   String? _activeFeature;
   late AnimationController _animationController;
 
-  FeatureTourConfig get config => FeatureTourConfig.of(context);
+  FeatureOverlayConfig get config => FeatureOverlayConfig.of(context);
 
   @override
   void initState() {
@@ -127,8 +132,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   @override
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
-    if(_activeFeature != config.activeFeature) {
-      advanceState(activeFeature: config.activeFeature);
+    print("_DescribedFeatureOverlayState.didChangeDependencies _activeFeature=$_activeFeature config.activeFeatureId=${config.activeFeatureId}");
+    if(_activeFeature != config.activeFeatureId) {
+      advanceState(activeFeature: config.activeFeatureId);
     }
     super.didChangeDependencies();
   }

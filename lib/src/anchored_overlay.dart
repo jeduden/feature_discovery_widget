@@ -1,5 +1,6 @@
-
 import 'package:flutter/material.dart';
+
+import 'feature_overlay_config.dart';
 
 class AnchoredOverlay extends StatelessWidget {
   final bool? showOverlay;
@@ -20,13 +21,14 @@ class AnchoredOverlay extends StatelessWidget {
             final center = box.size.center(box.localToGlobal(
               const Offset(0.0, 0.0),
             ));
-            return overlayBuilder!(context, center);
+            return CompositedTransformFollower(
+                link: FeatureOverlayConfig.of(context).layerLink,
+                child: overlayBuilder!(context, center));
           },
           child: child,
         ),
       );
 }
-
 
 class _OverlayBuilder extends StatefulWidget {
   final bool? showOverlay;
@@ -87,16 +89,16 @@ class _OverlayBuilderState extends State<_OverlayBuilder> {
   void syncWidgetAndOverlay() {
     if (isShowingOverlay() && !widget.showOverlay!) {
       hideOverlay();
-    } else if (!isShowingOverlay() && widget.showOverlay!) showOverlay();
+    } else if (!isShowingOverlay() && widget.showOverlay!) {
+      showOverlay();
+    }
   }
 
   void buildOverlay() async => overlayEntry?.markNeedsBuild();
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      buildOverlay();
-    });
-    return widget.child!;
+    final LayerLink layerLink = FeatureOverlayConfig.of(context).layerLink;
+    return CompositedTransformTarget(link: layerLink, child: widget.child);
   }
 }

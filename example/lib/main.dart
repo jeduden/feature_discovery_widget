@@ -6,28 +6,27 @@ void main() {
 }
 
 const IncrementFeatureId = "Increment";
-
+const HomePortal = "HomePortal";
 
 class MyApp extends StatelessWidget {
   final bool disableAnimations;
 
-  MyApp({
-    this.disableAnimations: false
-  });
+  MyApp({this.disableAnimations: false});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return FeatureOverlayConfigProvider(
+        child: MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: FeatureTourWidget(
-        child:MyHomePage(title: 'Flutter Demo Home Page'),
-        features: [IncrementFeatureId],
+        child: MyHomePage(title: 'Flutter Demo Home Page'),
+        featureIds: [IncrementFeatureId],
         enablePulsingAnimation: !disableAnimations,
-        ),
-    );
+      ),
+    ));
   }
 }
 
@@ -50,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonBuilder = (Key key,BuildContext context) {
+    final buttonBuilder = (Key key, BuildContext context) {
       return FloatingActionButton(
           key: key,
           onPressed: _incrementCounter,
@@ -62,25 +61,29 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+      body: FeatureOverlayPortal(
+          portalId: HomePortal,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'You have pushed the button this many times:',
+                ),
+                Text(
+                  '$_counter',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
+          )),
       floatingActionButton: DescribedFeatureOverlay(
-        featureId: IncrementFeatureId,
-        child: buttonBuilder(ValueKey("child"),context),
-        tapTarget: Icon(Icons.ac_unit) //buttonBuilder(ValueKey("tap"),context),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          portalId: HomePortal,
+          featureId: IncrementFeatureId,
+          child: buttonBuilder(ValueKey("child"), context),
+          tapTarget:
+              Icon(Icons.ac_unit) //buttonBuilder(ValueKey("tap"),context),
+          ),
     );
   }
 }
