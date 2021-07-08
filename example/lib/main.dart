@@ -7,6 +7,7 @@ void main() {
 
 const IncrementFeatureId = "Increment";
 const HomePortal = "HomePortal";
+const providerKey = GlobalObjectKey("provider");
 
 class MyApp extends StatelessWidget {
   final bool disableAnimations;
@@ -16,6 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FeatureOverlayConfigProvider(
+        key:providerKey,
         child: MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(

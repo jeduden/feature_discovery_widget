@@ -59,12 +59,14 @@ class FeatureTourState extends State<FeatureTourWidget> {
   }
 
   void _setActive(String? active) {
-    final notifier = FeatureOverlayConfigProvider.notifierOf(context);
-    notifier.notifyActiveFeature(active);
+    //final notifier = FeatureOverlayConfigProvider.notifierOf(context);
+    //notifier.notifyActiveFeature(active);
   }
 
   @override
   Widget build(BuildContext context) {
+    /// ... doh
+    /// duplicate here....
     return FeatureOverlayConfigProvider(
       enablePulsingAnimation: widget.enablePulsingAnimation,
       onDismiss: (_) => setState(() {

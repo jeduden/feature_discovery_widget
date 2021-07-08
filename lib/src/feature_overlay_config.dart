@@ -84,7 +84,7 @@ class FeatureOverlayConfig extends InheritedWidget {
   static FeatureOverlayConfig of(BuildContext context) {
     final FeatureOverlayConfig? result =
         context.dependOnInheritedWidgetOfExactType<FeatureOverlayConfig>();
-    print("FeatureOverlayConfig.of activeFeatureId:${result?.activeFeatureId}");
+    print("FeatureOverlayConfig.of => $result activeFeatureId:${result?.activeFeatureId}");
     assert(result != null, 'No FeatureOverlayConfig found in context');
     return result!;
   }

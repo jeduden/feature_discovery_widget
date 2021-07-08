@@ -45,8 +45,9 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    print("FeatureOverlayConfigProvider.createState");
-    return FeatureOverlayConfigProviderState();
+    final state = FeatureOverlayConfigProviderState();
+    print("FeatureOverlayConfigProvider.createState => $state");
+    return state;
   }
 
   static FeatureOverlayConfigChangeNotifier notifierOf(BuildContext context) {
@@ -58,6 +59,8 @@ abstract class FeatureOverlayConfigChangeNotifier {
   void notifyActiveFeature(String? featureId);
 }
 
+final configKey = GlobalKey(debugLabel: "config");
+
 class FeatureOverlayConfigProviderState 
     extends State<FeatureOverlayConfigProvider> implements FeatureOverlayConfigChangeNotifier {
   String? _activeFeatureId;
@@ -68,13 +71,14 @@ class FeatureOverlayConfigProviderState
   @override
   void initState() {
     layerLink = LayerLink();
+    print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();
   }
 
   @override
   void notifyActiveFeature(String? featureId) {
     setState(() {
-      print("FeatureOverlayConfigProviderState.setState _activeFeatureId:$_activeFeatureId");
+      print("FeatureOverlayConfigProviderState.notifyActiveFeature.setState $this _activeFeatureId:$_activeFeatureId");
       _activeFeatureId = featureId;
     });
   }
@@ -89,8 +93,8 @@ class FeatureOverlayConfigProviderState
 
   @override
   Widget build(BuildContext context) {
-    print("FeatureOverlayConfigProviderState.build _activeFeatureId:$_activeFeatureId");
-    return FeatureOverlayConfig(
+    final config = FeatureOverlayConfig(
+      key: configKey,
       layerLink: layerLink,
       child: widget.child,
       activeFeatureId: _activeFeatureId,
@@ -104,6 +108,8 @@ class FeatureOverlayConfigProviderState
       onOpen: widget.onOpen,
       onDismiss: widget.onOpen,
     );
+    print("FeatureOverlayConfigProviderState.build $this => $config _activeFeatureId:$_activeFeatureId");
+    return config;
   }
 
   static FeatureOverlayConfigProviderState of(BuildContext context) {
