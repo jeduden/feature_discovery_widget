@@ -104,6 +104,16 @@ class _OverlayBuilderState extends State<_OverlayBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      buildOverlay();//everytime this widget is built - we need to rebuild 
+      // the overlay. since we only have a builder method
+      // the dependency of the child are not applied for the contents of the builder.
+      // they are applied to this part of the tree.  
+      // we need to call this in a post - since the build is already in progress
+      // this means all rebuilds of the overlay are delayed by one frame.
+      // :(
+    });
+    
     final LayerLink layerLink = FeatureOverlayConfig.of(context).layerLink;
     return CompositedTransformTarget(link: layerLink, child: widget.child);
   }

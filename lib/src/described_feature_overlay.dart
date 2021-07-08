@@ -107,7 +107,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   }
 }
 
-class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with TickerProviderStateMixin
+class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with SingleTickerProviderStateMixin
      {
   late Size _screenSize;
 
@@ -126,8 +126,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
     _animationController = AnimationController(
         vsync: this, duration: Duration(seconds: 1))
       ..addListener(
-          () => setState((){}))
+          () {
+            setState((){});
+          })
       ..addStatusListener((status) {
+        print("AnimationStatus: ${status.toString()}");
         if(status == AnimationStatus.completed)
           advanceState(activeFeature: _activeFeature);
       });
@@ -201,6 +204,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
           _animationController.forward(from: 0);
           break;
       }
+
+      print("State: ${_state.toString()}");
     });
   }
 
