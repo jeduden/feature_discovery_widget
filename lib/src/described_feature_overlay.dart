@@ -12,6 +12,8 @@ import 'package:feature_discovery_widget/src/center_about.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 import 'package:feature_discovery_widget/src/anchored_overlay.dart';
 
+import 'feature_overlay_event.dart';
+
 class DescribedFeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
   /// This id must be unique among all the [DescribedFeatureOverlay] widgets.
@@ -113,7 +115,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   String? _activeFeature;
   late AnimationController _animationController;
 
-  FeatureOverlayConfig get config => FeatureOverlayConfig.of(context);
+  FeatureOverlayConfig get config {
+    print("_DescribedFeatureOverlayState.config");
+    return FeatureOverlayConfig.of(context);
+  }
 
   @override
   void initState() {
@@ -155,13 +160,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
         case FeatureOverlayState.opening:
           assert(to == null);
           if(_activeFeature != widget.featureId) {
-            _state = FeatureOverlayState.dismissing;
+            _setOverlayState(FeatureOverlayState.dismissing);
             _animationController.duration = config.dismissDuration;
             _animationController.forward(from: 0);
           }
           else {
-            _state = FeatureOverlayState.opened;
-            config.onOpen?.call(widget.featureId);
+            _setOverlayState(FeatureOverlayState.opened);
             if(config.enablePulsingAnimation) {
               _animationController.duration = config.pulseDuration;
               _animationController.repeat();
@@ -170,18 +174,16 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
           break;
         case FeatureOverlayState.completing:
           assert(to == null);
-          config.onComplete?.call(widget.featureId);
-          _state = FeatureOverlayState.closed;
+          _setOverlayState(FeatureOverlayState.closed);
           break;
         case FeatureOverlayState.dismissing:
           assert(to == null);
-          config.onDismiss?.call(widget.featureId);
-          _state = FeatureOverlayState.closed;
+          _setOverlayState(FeatureOverlayState.closed);
           break;
         case FeatureOverlayState.closed:
           assert(to == null);
           if(_activeFeature == widget.featureId) {
-            _state = FeatureOverlayState.opening;
+            _setOverlayState(FeatureOverlayState.opening);
             _animationController.duration = config.openDuration;
             _animationController.forward(from: 0);
           }
@@ -189,17 +191,24 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
         case FeatureOverlayState.opened:
           if(to == FeatureOverlayState.completing) {
             _animationController.duration = config.completeDuration;
-            _state = FeatureOverlayState.completing;
+            _setOverlayState(FeatureOverlayState.completing);
           }
           else {
             assert(to == FeatureOverlayState.dismissing || to==null);
             _animationController.duration = config.dismissDuration;
-            _state = FeatureOverlayState.dismissing;
+            _setOverlayState(FeatureOverlayState.dismissing);
           }
           _animationController.forward(from: 0);
           break;
       }
     });
+  }
+
+  void _setOverlayState(FeatureOverlayState nextState) {
+    final previousState = _state;
+    _state = nextState;
+    config.eventsSink.add(FeatureOverlayEvent(
+      state: _state, previousState: previousState, featureId: widget.featureId));
   }
 
   void _dismiss() {

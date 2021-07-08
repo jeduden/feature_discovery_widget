@@ -23,7 +23,7 @@ class AnchoredOverlay extends StatelessWidget {
             ));
             return CompositedTransformFollower(
                 link: FeatureOverlayConfig.of(context).layerLink,
-                child: overlayBuilder!(context, center));
+                child: overlayBuilder!(context, Offset(0.0,0.0)));
           },
           child: child,
         ),
@@ -50,6 +50,12 @@ class _OverlayBuilderState extends State<_OverlayBuilder> {
   void initState() {
     super.initState();
     if (widget.showOverlay!) showOverlay();
+  }
+
+  @override
+  void didChangeDependencies()
+  {
+    super.didChangeDependencies();
   }
 
   @override

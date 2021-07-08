@@ -3,22 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'feature_overlay_event.dart';
+
 class FeatureOverlayConfig extends InheritedWidget {
   /// Enables/Disables the pulsing animation
   /// Disable in tests since the pulse animation does not end.
   final bool enablePulsingAnimation;
 
-  /// Called after the opening animation finished
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onOpen;
-
-  /// Called whenever the user taps outside the overlay area and dismiss animation is finished
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onDismiss;
-
-  /// Called when the tap target is tapped and completion animation is finished
-  /// Receives the featureId.
-  final FutureOr<void> Function(String)? onComplete;
+  final EventSink<FeatureOverlayEvent> eventsSink;
 
   /// Currently active feature id
   final String? activeFeatureId;
@@ -48,9 +40,7 @@ class FeatureOverlayConfig extends InheritedWidget {
     required Widget child,
     this.enablePulsingAnimation: true,
     required this.layerLink,
-    this.onOpen,
-    this.onDismiss,
-    this.onComplete,
+    required this.eventsSink,
     this.activeFeatureId,
     this.activePortalId,
     this.activeOverlayBuilder,
@@ -67,9 +57,7 @@ class FeatureOverlayConfig extends InheritedWidget {
     final result = child != oldWidget.child ||
         enablePulsingAnimation != oldWidget.enablePulsingAnimation ||
         layerLink != oldWidget.layerLink ||
-        onOpen != oldWidget.onOpen ||
-        onComplete != oldWidget.onComplete ||
-        onDismiss != oldWidget.onDismiss ||
+        eventsSink != oldWidget.eventsSink ||
         activeFeatureId != oldWidget.activeFeatureId ||
         activePortalId != oldWidget.activePortalId ||
         activeOverlayBuilder != oldWidget.activeOverlayBuilder ||
@@ -84,7 +72,6 @@ class FeatureOverlayConfig extends InheritedWidget {
   static FeatureOverlayConfig of(BuildContext context) {
     final FeatureOverlayConfig? result =
         context.dependOnInheritedWidgetOfExactType<FeatureOverlayConfig>();
-    print("FeatureOverlayConfig.of => $result activeFeatureId:${result?.activeFeatureId}");
     assert(result != null, 'No FeatureOverlayConfig found in context');
     return result!;
   }
