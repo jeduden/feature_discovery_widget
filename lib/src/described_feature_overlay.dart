@@ -16,6 +16,7 @@ import 'feature_overlay_event.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
+
   /// This id must be unique among all the [DescribedFeatureOverlay] widgets.
   final String featureId;
 
@@ -98,7 +99,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
     this.barrierDismissible = true,
-  })  : super(key: key);
+  }) : super(key: key);
 
   @override
   _DescribedFeatureOverlayState createState() {
@@ -107,8 +108,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
   }
 }
 
-class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with SingleTickerProviderStateMixin
-     {
+class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
+    with SingleTickerProviderStateMixin {
   late Size _screenSize;
 
   late FeatureOverlayState _state;
@@ -123,53 +124,51 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   @override
   void initState() {
     _state = FeatureOverlayState.closed;
-    _animationController = AnimationController(
-        vsync: this, duration: Duration(seconds: 1))
-      ..addListener(
-          () {
-            setState((){});
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 1))
+          ..addListener(() {
+            setState(() {});
           })
-      ..addStatusListener((status) {
-        print("AnimationStatus: ${status.toString()}");
-        if(status == AnimationStatus.completed)
-          advanceState(activeFeature: _activeFeature);
-      });
+          ..addStatusListener((status) {
+            print("AnimationStatus: ${status.toString()}");
+            if (status == AnimationStatus.completed)
+              advanceState(activeFeature: _activeFeature);
+          });
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
-    print("_DescribedFeatureOverlayState.didChangeDependencies _activeFeature=$_activeFeature config.activeFeatureId=${config.activeFeatureId}");
-    if(_activeFeature != config.activeFeatureId) {
+    print(
+        "_DescribedFeatureOverlayState.didChangeDependencies _activeFeature=$_activeFeature config.activeFeatureId=${config.activeFeatureId}");
+    if (_activeFeature != config.activeFeatureId) {
       advanceState(activeFeature: config.activeFeatureId);
     }
     super.didChangeDependencies();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
 
-  void advanceState({FeatureOverlayState? to,required String? activeFeature})
-  {
+  void advanceState({FeatureOverlayState? to, required String? activeFeature}) {
     setState(() {
       _activeFeature = activeFeature;
-      _animationController.stop(); // we don't want any completion notifications. anymore
-      switch(_state)
-      {
+      _animationController
+          .stop(); // we don't want any completion notifications. anymore
+      switch (_state) {
         case FeatureOverlayState.opening:
           assert(to == null);
-          if(_activeFeature != widget.featureId) {
+          if (_activeFeature != widget.featureId) {
             _setOverlayState(FeatureOverlayState.dismissing);
             _animationController.duration = config.dismissDuration;
             _animationController.forward(from: 0);
-          }
-          else {
+          } else {
             _setOverlayState(FeatureOverlayState.opened);
-            if(config.enablePulsingAnimation) {
+            if (config.enablePulsingAnimation) {
               _animationController.duration = config.pulseDuration;
               _animationController.repeat();
             }
@@ -185,19 +184,18 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
           break;
         case FeatureOverlayState.closed:
           assert(to == null);
-          if(_activeFeature == widget.featureId) {
+          if (_activeFeature == widget.featureId) {
             _setOverlayState(FeatureOverlayState.opening);
             _animationController.duration = config.openDuration;
             _animationController.forward(from: 0);
           }
           break;
         case FeatureOverlayState.opened:
-          if(to == FeatureOverlayState.completing) {
+          if (to == FeatureOverlayState.completing) {
             _animationController.duration = config.completeDuration;
             _setOverlayState(FeatureOverlayState.completing);
-          }
-          else {
-            assert(to == FeatureOverlayState.dismissing || to==null);
+          } else {
+            assert(to == FeatureOverlayState.dismissing || to == null);
             _animationController.duration = config.dismissDuration;
             _setOverlayState(FeatureOverlayState.dismissing);
           }
@@ -213,15 +211,19 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
     final previousState = _state;
     _state = nextState;
     config.eventsSink.add(FeatureOverlayEvent(
-      state: _state, previousState: previousState, featureId: widget.featureId));
+        state: _state,
+        previousState: previousState,
+        featureId: widget.featureId));
   }
 
   void _dismiss() {
-    advanceState(to:FeatureOverlayState.dismissing,activeFeature: _activeFeature);
+    advanceState(
+        to: FeatureOverlayState.dismissing, activeFeature: _activeFeature);
   }
 
   void _complete() {
-    advanceState(to:FeatureOverlayState.completing,activeFeature: _activeFeature);
+    advanceState(
+        to: FeatureOverlayState.completing, activeFeature: _activeFeature);
   }
 
   bool _isCloseToTopOrBottom(Offset position) =>
@@ -351,7 +353,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
     return 1;
   }
 
-  Widget _buildOverlay(Offset anchor) {
+  Widget _buildOverlay(BuildContext context) {
+    final anchor = Offset.zero;
+
     // This will be assigned either above or below, i.e. trivial from
     // widget.contentLocation will be converted to above or below.
     final contentLocation = _nonTrivialContentOrientation(anchor);
@@ -372,89 +376,85 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
           contentOffsetMultiplier * (44 + 20), // 44 is the tap target's radius.
     );
 
-    Widget background = Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.transparent,
+    Widget background = GestureDetector(
+      onTap: () => _dismiss(),
+      // According to the spec, the user should be able to dismiss by swiping.
+      onPanUpdate: (_) => _dismiss(),
     );
 
-    if (widget.barrierDismissible) {
-      background = GestureDetector(
-        onTap: () => _dismiss(),
-        // According to the spec, the user should be able to dismiss by swiping.
-        onPanUpdate: (_) => _dismiss(),
-        child: background,
-      );
-    }
-
-    return Stack(
-      children: <Widget>[
-        background,
-        CustomMultiChildLayout(
-          delegate: BackgroundContentLayoutDelegate(
-            overflowMode: widget.overflowMode,
-            contentPosition: contentPosition,
-            backgroundCenter: backgroundCenter,
-            backgroundRadius: backgroundRadius,
-            anchor: anchor,
-            contentOffsetMultiplier: contentOffsetMultiplier,
-            state: _state,
-            transitionProgress: _animationController.value,
-          ),
-          children: <Widget>[
-            LayoutId(
-              id: BackgroundContentLayout.background,
-              child: _Background(
-                transitionProgress: _animationController.value,
-                color: widget.backgroundColor ?? Theme.of(context).primaryColor,
-                defaultOpacity: widget.backgroundOpacity,
-                state: _state,
-                overflowMode: widget.overflowMode,
-                onTap: () async {
-                  if(widget.barrierDismissible) 
-                    _dismiss();
-                }
+    return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
+      if (widget.barrierDismissible) background,
+      CompositedTransformFollower(
+          link: FeatureOverlayConfig.of(context).layerLink,
+          targetAnchor: Alignment.center,
+          followerAnchor: Alignment.topLeft,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              CustomMultiChildLayout(
+                delegate: BackgroundContentLayoutDelegate(
+                  overflowMode: widget.overflowMode,
+                  contentPosition: contentPosition,
+                  backgroundCenter: backgroundCenter,
+                  backgroundRadius: backgroundRadius,
+                  anchor: anchor,
+                  contentOffsetMultiplier: contentOffsetMultiplier,
+                  state: _state,
+                  transitionProgress: _animationController.value,
+                ),
+                children: <Widget>[
+                  LayoutId(
+                    id: BackgroundContentLayout.background,
+                    child: _Background(
+                        transitionProgress: _animationController.value,
+                        color: widget.backgroundColor ??
+                            Theme.of(context).primaryColor,
+                        defaultOpacity: widget.backgroundOpacity,
+                        state: _state,
+                        overflowMode: widget.overflowMode,
+                        onTap: () async {
+                          if (widget.barrierDismissible) _dismiss();
+                        }),
+                  ),
+                  LayoutId(
+                    id: BackgroundContentLayout.content,
+                    child: Content(
+                      state: _state,
+                      transitionProgress: _animationController.value,
+                      title: widget.title,
+                      description: widget.description,
+                      textColor: widget.textColor,
+                      overflowMode: widget.overflowMode,
+                      backgroundCenter: backgroundCenter,
+                      backgroundRadius: backgroundRadius,
+                      width: contentWidth,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            LayoutId(
-              id: BackgroundContentLayout.content,
-              child: Content(
+              _Pulse(
                 state: _state,
                 transitionProgress: _animationController.value,
-                title: widget.title,
-                description: widget.description,
-                textColor: widget.textColor,
-                overflowMode: widget.overflowMode,
-                backgroundCenter: backgroundCenter,
-                backgroundRadius: backgroundRadius,
-                width: contentWidth,
+                anchor: anchor,
+                color: widget.targetColor,
               ),
-            ),
-          ],
-        ),
-        _Pulse(
-          state: _state,
-          transitionProgress: _animationController.value,
-          anchor: anchor,
-          color: widget.targetColor,
-        ),
-        _TapTarget(
-          state: _state,
-          transitionProgress: _animationController.value,
-          anchor: anchor,
-          color: widget.targetColor,
-          onPressed: _complete,
-          child: widget.tapTarget,
-        ),
-      ],
-    );
+              _TapTarget(
+                state: _state,
+                transitionProgress: _animationController.value,
+                anchor: anchor,
+                color: widget.targetColor,
+                onPressed: _complete,
+                child: widget.tapTarget,
+              ),
+            ],
+          ))
+    ]);
   }
 
   @override
   Widget build(BuildContext context) => AnchoredOverlay(
         showOverlay: _state != FeatureOverlayState.closed,
-        overlayBuilder: (BuildContext context, Offset anchor) =>
-            _buildOverlay(anchor),
+        overlayBuilder: _buildOverlay,
         child: widget.child,
       );
 }
@@ -658,11 +658,10 @@ class _TapTarget extends StatelessWidget {
           child: Opacity(
             opacity: opacity,
             child: RawMaterialButton(
-              fillColor: color,
-              shape: const CircleBorder(),
-              child: child,
-              onPressed: onPressed
-            ),
+                fillColor: color,
+                shape: const CircleBorder(),
+                child: child,
+                onPressed: onPressed),
           ),
         ),
       );

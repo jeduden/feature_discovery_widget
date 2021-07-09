@@ -4,7 +4,7 @@ import 'feature_overlay_config.dart';
 
 class AnchoredOverlay extends StatelessWidget {
   final bool? showOverlay;
-  final Widget Function(BuildContext, Offset anchor)? overlayBuilder;
+  final Widget Function(BuildContext)? overlayBuilder;
   final Widget? child;
 
   const AnchoredOverlay(
@@ -15,16 +15,7 @@ class AnchoredOverlay extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) => _OverlayBuilder(
           showOverlay: showOverlay,
-          overlayBuilder: (BuildContext overlayContext) {
-            /// calculate center and path to up
-            final box = context.findRenderObject() as RenderBox;
-            final center = box.size.center(box.localToGlobal(
-              const Offset(0.0, 0.0),
-            ));
-            return CompositedTransformFollower(
-                link: FeatureOverlayConfig.of(context).layerLink,
-                child: overlayBuilder!(context, Offset(0.0,0.0)));
-          },
+          overlayBuilder: overlayBuilder,
           child: child,
         ),
       );
