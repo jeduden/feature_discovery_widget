@@ -16,10 +16,10 @@ class FeatureOverlayConfig extends InheritedWidget {
   final String? activeFeatureId;
 
   /// Currently active overlay
-  final WidgetBuilder? activeOverlayBuilder;
+  final OverlayEntry? activeOverlayEntry;
 
-  /// Currently active portal
-  final String? activePortalId;
+  /// Currently request portal by feature
+  final String? requestedPortalId;
 
   /// Duration for overlay open animation.
   final Duration openDuration;
@@ -42,8 +42,8 @@ class FeatureOverlayConfig extends InheritedWidget {
     required this.layerLink,
     required this.eventsSink,
     this.activeFeatureId,
-    this.activePortalId,
-    this.activeOverlayBuilder,
+    this.requestedPortalId,
+    this.activeOverlayEntry,
     this.openDuration: const Duration(milliseconds: 500),
     this.pulseDuration: const Duration(milliseconds: 1000),
     this.completeDuration: const Duration(milliseconds: 250),
@@ -59,8 +59,8 @@ class FeatureOverlayConfig extends InheritedWidget {
         layerLink != oldWidget.layerLink ||
         eventsSink != oldWidget.eventsSink ||
         activeFeatureId != oldWidget.activeFeatureId ||
-        activePortalId != oldWidget.activePortalId ||
-        activeOverlayBuilder != oldWidget.activeOverlayBuilder ||
+        requestedPortalId != oldWidget.requestedPortalId ||
+        activeOverlayEntry != oldWidget.activeOverlayEntry ||
         openDuration != oldWidget.openDuration ||
         pulseDuration != oldWidget.pulseDuration ||
         completeDuration != oldWidget.completeDuration ||

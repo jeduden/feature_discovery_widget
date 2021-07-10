@@ -6,14 +6,16 @@ class AnchoredOverlay extends StatelessWidget {
   final bool? showOverlay;
   final Widget Function(BuildContext)? overlayBuilder;
   final Widget? child;
+  final String portalId;
 
   const AnchoredOverlay(
-      {Key? key, this.showOverlay, this.overlayBuilder, this.child})
+      {Key? key, this.showOverlay, this.overlayBuilder, this.child, required this.portalId})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) => _OverlayBuilder(
+          portalId: portalId,
           showOverlay: showOverlay,
           overlayBuilder: overlayBuilder,
           child: child,
@@ -24,10 +26,11 @@ class AnchoredOverlay extends StatelessWidget {
 class _OverlayBuilder extends StatefulWidget {
   final bool? showOverlay;
   final Function(BuildContext context)? overlayBuilder;
+  final String portalId;
   final Widget? child;
 
   const _OverlayBuilder(
-      {Key? key, this.showOverlay = false, this.overlayBuilder, this.child})
+      {Key? key, this.showOverlay = false, this.overlayBuilder, this.child, required this.portalId})
       : super(key: key);
 
   @override
@@ -70,11 +73,20 @@ class _OverlayBuilderState extends State<_OverlayBuilder> {
   bool isShowingOverlay() => overlayEntry != null;
 
   void showOverlay() {
-    overlayEntry = OverlayEntry(
+    final entry =  OverlayEntry(
       builder: widget.overlayBuilder as Widget Function(BuildContext),
     );
+    overlayEntry = entry;
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      Overlay.of(context)!.insert(overlayEntry!);
+      final key = GlobalObjectKey<OverlayState>(widget.portalId);
+      if(key.currentState == null) {
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          key.currentState!.insert(entry);
+        });
+      }
+      else {
+        key.currentState!.insert(entry);
+      }
     });
   }
 
@@ -95,6 +107,7 @@ class _OverlayBuilderState extends State<_OverlayBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    //syncWidgetAndOverlay();
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       buildOverlay();//everytime this widget is built - we need to rebuild 
       // the overlay. since we only have a builder method

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:feature_discovery_widget/src/center_about.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 import 'package:feature_discovery_widget/src/anchored_overlay.dart';
 
+import 'feature_overlay_config_provider.dart';
 import 'feature_overlay_event.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
@@ -167,6 +169,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             _animationController.duration = config.dismissDuration;
             _animationController.forward(from: 0);
           } else {
+            FeatureOverlayConfigProviderState.of(context)
+                .requestPortalForOverlayEntry(
+                    widget.portalId, OverlayEntry(builder: _buildOverlay));
             _setOverlayState(FeatureOverlayState.opened);
             if (config.enablePulsingAnimation) {
               _animationController.duration = config.pulseDuration;
@@ -453,6 +458,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   @override
   Widget build(BuildContext context) => AnchoredOverlay(
+        portalId: widget.portalId,
         showOverlay: _state != FeatureOverlayState.closed,
         overlayBuilder: _buildOverlay,
         child: widget.child,

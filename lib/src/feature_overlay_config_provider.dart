@@ -56,14 +56,12 @@ abstract class FeatureOverlayConfigChangeNotifier {
   void notifyActiveFeature(String? featureId);
 }
 
-final configKey = GlobalKey(debugLabel: "config");
-
 class FeatureOverlayConfigProviderState
     extends State<FeatureOverlayConfigProvider>
     implements FeatureOverlayConfigChangeNotifier {
   String? _activeFeatureId;
-  WidgetBuilder? _activeOverlayBuilder;
-  String? _activePortalId;
+  String? _requestedPortalId;  
+  OverlayEntry? _activeOverlayEntry;
   late LayerLink layerLink;
 
   late StreamController<FeatureOverlayEvent> _eventsController;
@@ -83,6 +81,15 @@ class FeatureOverlayConfigProviderState
     _eventsController.close();
     super.dispose();
   }
+  
+  void requestPortalForOverlayEntry(String? portalId, OverlayEntry? entry) {
+    setState(() {
+      print(
+          "FeatureOverlayConfigProviderState.requestPortal $this => $portalId");
+      _requestedPortalId = portalId;
+      _activeOverlayEntry = entry;
+    });
+  }
 
   @override
   void notifyActiveFeature(String? featureId) {
@@ -93,24 +100,15 @@ class FeatureOverlayConfigProviderState
     });
   }
 
-  void setActiveOverlayBuilderForPortal(
-      String portalId, WidgetBuilder? overlayBuilder) {
-    setState(() {
-      _activePortalId = portalId;
-      _activeOverlayBuilder = overlayBuilder;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final config = FeatureOverlayConfig(
-      key: configKey,
       layerLink: layerLink,
       child: widget.child,
+      requestedPortalId: _requestedPortalId,
       eventsSink: _eventsController.sink,
+      activeOverlayEntry: _activeOverlayEntry,
       activeFeatureId: _activeFeatureId,
-      activeOverlayBuilder: _activeOverlayBuilder,
-      activePortalId: _activePortalId,
       openDuration: widget.openDuration,
       completeDuration: widget.completeDuration,
       dismissDuration: widget.dismissDuration,
