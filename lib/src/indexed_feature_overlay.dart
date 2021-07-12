@@ -45,7 +45,10 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
         activeFeatureOverlayFromThis = list[activeIndex];
     }
     if(activeFeatureOverlayFromThis != currentFeatureOverlay) {
-      currentOverlayEntry?.remove();
+      if(currentOverlayEntry?.mounted??false)
+        currentOverlayEntry?.remove();
+      else
+        currentOverlayEntry = null;
       if (activeFeatureOverlayFromThis != null) {
         currentFeatureOverlay = activeFeatureOverlayFromThis;
         currentOverlayEntry = OverlayEntry(builder: (_) => currentFeatureOverlay!);
