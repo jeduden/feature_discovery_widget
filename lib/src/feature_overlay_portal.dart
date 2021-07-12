@@ -1,7 +1,7 @@
 
 
 import 'package:flutter/material.dart';
-class FeatureOverlayPortal extends Overlay {
+class FeatureOverlayPortal extends StatelessWidget {
   final String portalId;
   final Widget child;
 

@@ -6,6 +6,7 @@ void main() {
 }
 
 const IncrementFeatureId = "Increment";
+const CounterFeatureId = "Counter";
 const HomePortal = "HomePortal";
 const providerKey = GlobalObjectKey("provider");
 
@@ -17,18 +18,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FeatureOverlayConfigProvider(
-        key:providerKey,
+        key: providerKey,
         child: MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: FeatureTourWidget(
-        child: MyHomePage(title: 'Flutter Demo Home Page'),
-        featureIds: [IncrementFeatureId],
-        enablePulsingAnimation: !disableAnimations,
-      ),
-    ));
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: FeatureTourWidget(
+            child: MyHomePage(title: 'Flutter Demo Home Page'),
+            featureIds: [IncrementFeatureId],
+            enablePulsingAnimation: !disableAnimations,
+          ),
+        ));
   }
 }
 
@@ -59,33 +60,46 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Icon(Icons.add));
     };
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: FeatureOverlayPortal(
-          portalId: HomePortal,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.headline4,
-                ),
-              ],
+    return IndexedFeatureOverlay(
+        featureOverlays: {
+          FeatureOverlay(
+              featureId: IncrementFeatureId,
+              title: Icon(Icons.ac_unit),
+              tapTarget:
+                  Icon(Icons.ac_unit) //buttonBuilder(ValueKey("tap"),context),
+              )
+        },
+        child: Scaffold(
+            appBar: AppBar(
+              title: Text(widget.title),
             ),
-          )),
-      floatingActionButton: DescribedFeatureOverlay(
-          portalId: HomePortal,
-          featureId: IncrementFeatureId,
-          child: buttonBuilder(ValueKey("child"), context),
-          tapTarget:
-              Icon(Icons.ac_unit) //buttonBuilder(ValueKey("tap"),context),
-          ),
-    );
+            body: IndexedFeatureOverlay(
+                featureOverlays: {
+                  FeatureOverlay(
+                      featureId: CounterFeatureId,
+                      title: Icon(Icons.access_alarm),
+                      tapTarget: Icon(Icons
+                          .access_alarm) //buttonBuilder(ValueKey("tap"),context),
+                      )
+                },
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'You have pushed the button this many times:',
+                      ),
+                      FeatureOverlayTarget(
+                          featureId: CounterFeatureId,
+                          child: Text(
+                            '$_counter',
+                            style: Theme.of(context).textTheme.headline4,
+                          )),
+                    ],
+                  ),
+                )),
+            floatingActionButton: FeatureOverlayTarget(
+                featureId: IncrementFeatureId,
+                child: buttonBuilder(ValueKey("child"), context))));
   }
 }

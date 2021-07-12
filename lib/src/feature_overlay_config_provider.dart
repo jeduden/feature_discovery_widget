@@ -82,11 +82,10 @@ class FeatureOverlayConfigProviderState
     super.dispose();
   }
   
-  void requestPortalForOverlayEntry(String? portalId, OverlayEntry? entry) {
+  void requestPortalForOverlayEntry(OverlayEntry? entry) {
     setState(() {
       print(
-          "FeatureOverlayConfigProviderState.requestPortal $this => $portalId");
-      _requestedPortalId = portalId;
+          "FeatureOverlayConfigProviderState.requestPortal $this => $entry");
       _activeOverlayEntry = entry;
     });
   }

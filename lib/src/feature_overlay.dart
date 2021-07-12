@@ -16,15 +16,11 @@ import 'package:feature_discovery_widget/src/anchored_overlay.dart';
 import 'feature_overlay_config_provider.dart';
 import 'feature_overlay_event.dart';
 
-class DescribedFeatureOverlay extends StatefulWidget {
+class FeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
 
-  /// This id must be unique among all the [DescribedFeatureOverlay] widgets.
+  /// This id must be unique among all the [FeatureOverlay] widgets.
   final String featureId;
-
-  /// This id identifies the portal where the overlay is displayed.
-  /// Needs to be present in the tree
-  final String portalId;
 
   /// The color of the large circle, where the text sits on.
   /// If null, defaults to [ThemeData.primaryColor].
@@ -63,7 +59,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// to this [Widget] instead of as the [Key] of [DescribedFeatureOverlay].
   final Widget tapTarget;
 
-  final Widget child;
   final ContentLocation contentLocation;
 
   /// Controls what happens with content that overflows the background's area.
@@ -86,16 +81,14 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// The default value for [barrierDismissible] is `true`.
   final bool barrierDismissible;
 
-  DescribedFeatureOverlay({
+  FeatureOverlay({
     Key? key,
     required this.featureId,
-    required this.portalId,
     this.backgroundColor,
     this.targetColor = Colors.white,
     this.textColor = Colors.white,
     this.title,
     this.description,
-    required this.child,
     required this.tapTarget,
     this.contentLocation = ContentLocation.trivial,
     this.overflowMode = OverflowMode.ignore,
@@ -104,13 +97,13 @@ class DescribedFeatureOverlay extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _DescribedFeatureOverlayState createState() {
-    final state = _DescribedFeatureOverlayState();
+  _FeatureOverlayState createState() {
+    final state = _FeatureOverlayState();
     return state;
   }
 }
 
-class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
+class _FeatureOverlayState extends State<FeatureOverlay>
     with SingleTickerProviderStateMixin {
   late Size _screenSize;
 
@@ -169,9 +162,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             _animationController.duration = config.dismissDuration;
             _animationController.forward(from: 0);
           } else {
-            /*FeatureOverlayConfigProviderState.of(context)
-                .requestPortalForOverlayEntry(
-                    widget.portalId, OverlayEntry(builder: _buildOverlay));*/
             _setOverlayState(FeatureOverlayState.opened);
             if (config.enablePulsingAnimation) {
               _animationController.duration = config.pulseDuration;
@@ -457,12 +447,18 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   @override
-  Widget build(BuildContext context) => AnchoredOverlay(
-        portalId: widget.portalId,
-        showOverlay: _state != FeatureOverlayState.closed,
-        overlayBuilder: _buildOverlay,
-        child: widget.child,
-      );
+  Widget build(BuildContext context) {
+    final config = FeatureOverlayConfig.of(context);
+    final key = ValueKey(widget.featureId);
+    if (config.activeFeatureId == widget.featureId) {
+      return CompositedTransformFollower(
+          key: key,
+          link: config.layerLink, 
+          child: _buildOverlay(context));
+    } else {
+      return Container(key:key);
+    }
+  }
 }
 
 class _Background extends StatelessWidget {
