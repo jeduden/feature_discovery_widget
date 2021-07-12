@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
-import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

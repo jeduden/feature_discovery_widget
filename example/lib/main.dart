@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
           ),
           home: FeatureTourWidget(
             child: MyHomePage(title: 'Flutter Demo Home Page'),
-            featureIds: [IncrementFeatureId],
+            featureIds: [IncrementFeatureId,CounterFeatureId],
             enablePulsingAnimation: !disableAnimations,
           ),
         ));

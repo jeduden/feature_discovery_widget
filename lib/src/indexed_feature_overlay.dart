@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../feature_discovery_widget.dart';
+import 'feature_overlay.dart';
 import 'feature_overlay_config.dart';
 
 class IndexedFeatureOverlay extends StatefulWidget {

@@ -7,13 +7,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 import 'package:feature_discovery_widget/src/enums.dart';
-import 'package:feature_discovery_widget/src/background_content_layout.dart';
+import 'package:feature_discovery_widget/src/background_content_layout_delegate.dart';
 import 'package:feature_discovery_widget/src/content.dart';
 import 'package:feature_discovery_widget/src/center_about.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
-import 'package:feature_discovery_widget/src/anchored_overlay.dart';
 
-import 'feature_overlay_config_provider.dart';
+
 import 'feature_overlay_event.dart';
 
 class FeatureOverlay extends StatefulWidget {

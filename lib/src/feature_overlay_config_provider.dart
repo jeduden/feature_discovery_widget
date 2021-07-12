@@ -60,8 +60,6 @@ class FeatureOverlayConfigProviderState
     extends State<FeatureOverlayConfigProvider>
     implements FeatureOverlayConfigChangeNotifier {
   String? _activeFeatureId;
-  String? _requestedPortalId;  
-  OverlayEntry? _activeOverlayEntry;
   late LayerLink layerLink;
 
   late StreamController<FeatureOverlayEvent> _eventsController;
@@ -81,14 +79,6 @@ class FeatureOverlayConfigProviderState
     _eventsController.close();
     super.dispose();
   }
-  
-  void requestPortalForOverlayEntry(OverlayEntry? entry) {
-    setState(() {
-      print(
-          "FeatureOverlayConfigProviderState.requestPortal $this => $entry");
-      _activeOverlayEntry = entry;
-    });
-  }
 
   @override
   void notifyActiveFeature(String? featureId) {
@@ -104,9 +94,7 @@ class FeatureOverlayConfigProviderState
     final config = FeatureOverlayConfig(
       layerLink: layerLink,
       child: widget.child,
-      requestedPortalId: _requestedPortalId,
       eventsSink: _eventsController.sink,
-      activeOverlayEntry: _activeOverlayEntry,
       activeFeatureId: _activeFeatureId,
       openDuration: widget.openDuration,
       completeDuration: widget.completeDuration,
