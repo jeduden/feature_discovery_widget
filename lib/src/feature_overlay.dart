@@ -151,6 +151,14 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   void advanceState({FeatureOverlayState? to, required String? activeFeature}) {
     setState(() {
       _activeFeature = activeFeature;
+
+      if (_state == to) {
+        // dragging to dismiss. we keep getting advance state to dismissing
+        // we must not reset + restart the animation controller
+        // but actually continue the animation
+        assert(_state == FeatureOverlayState.dismissing);
+        return;
+      }
       _animationController
           .stop(); // we don't want any completion notifications. anymore
       switch (_state) {
