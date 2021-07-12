@@ -77,14 +77,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureOverlays: {
                   FeatureOverlay(
                       featureId: CounterFeatureId,
-                      title: Icon(Icons.access_alarm),
+                      title: Text("Title"),
                       tapTarget: Icon(Icons
                           .access_alarm) //buttonBuilder(ValueKey("tap"),context),
                       )
                 },
                 child: Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Text(
                         'You have pushed the button this many times:',
