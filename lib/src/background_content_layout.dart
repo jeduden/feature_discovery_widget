@@ -165,6 +165,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(BackgroundContentLayoutDelegate oldDelegate) =>
+      oldDelegate.transitionProgress != transitionProgress ||
       oldDelegate.overflowMode != overflowMode ||
       oldDelegate.contentPosition != contentPosition ||
       oldDelegate.backgroundCenter != backgroundCenter ||
