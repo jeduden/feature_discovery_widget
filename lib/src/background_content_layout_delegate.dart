@@ -139,6 +139,8 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
         throw ArgumentError.value(state);
     }
 
+    matchedRadius = max(matchedRadius, 0);
+
     layoutChild(
         BackgroundContentLayout.background,
         BoxConstraints.loose(Size(
