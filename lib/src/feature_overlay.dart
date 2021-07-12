@@ -12,7 +12,6 @@ import 'package:feature_discovery_widget/src/content.dart';
 import 'package:feature_discovery_widget/src/center_about.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 
-
 import 'feature_overlay_event.dart';
 
 class FeatureOverlay extends StatefulWidget {
@@ -458,12 +457,9 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     final config = FeatureOverlayConfig.of(context);
     final key = ValueKey(widget.featureId);
     if (config.activeFeatureId == widget.featureId) {
-      return CompositedTransformFollower(
-          key: key,
-          link: config.layerLink, 
-          child: _buildOverlay(context));
+      return _buildOverlay(context);
     } else {
-      return Container(key:key);
+      return Container(key: key);
     }
   }
 }
