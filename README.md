@@ -154,6 +154,9 @@ This package is work in progress and not yet published.
 ### To-do
 
 1. Transparent tap target.
-2. Extend example with a wider range of overlay configurations.
-3. Fix text placement issues
-4. Publish package.
+2. Fix text placement issues
+3. Unittests for statemachine
+4. Mark sure tapping on completion target is not accidentally dismissing the next target
+5. Add example with a wider range of overlay configurations.
+6. Remove debug statements
+7. Publish package.
