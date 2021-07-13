@@ -7,16 +7,19 @@ import 'package:flutter/material.dart';
 
 import 'feature_overlay_event.dart';
 
+/// Simple feature discovery guided tour
+/// using just plain flutter widgets.
+/// Best to be reimplemented using the statemanagement package that is used in the application.
+/// Expects to have [FeatureOverlayConfigProvider] as an ancestor.
 class FeatureTourWidget extends StatefulWidget {
   final Widget child;
+  /// List all feature ids in order.
   final List<String> featureIds;
-  final bool enablePulsingAnimation;
 
   FeatureTourWidget({
     Key? key,
     required this.child,
-    required this.featureIds,
-    this.enablePulsingAnimation = false,
+    required this.featureIds
   }) : super(key: key);
 
   @override
@@ -89,7 +92,6 @@ class FeatureTourState extends State<FeatureTourWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("FeatureTourState.build");
     return widget.child;
   }
 
