@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
           ),
           home: FeatureTourWidget(
             child: MyHomePage(title: 'Flutter Demo Home Page'),
-            featureIds: [IncrementFeatureId,CounterFeatureId],
+            featureIds: [IncrementFeatureId, CounterFeatureId],
             enablePulsingAnimation: !disableAnimations,
           ),
         ));
@@ -52,22 +52,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonBuilder = (Key key, BuildContext context) {
-      return FloatingActionButton(
-          key: key,
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
-          child: Icon(Icons.add));
-    };
-
     return IndexedFeatureOverlay(
         featureOverlays: {
           FeatureOverlay(
               featureId: IncrementFeatureId,
-              title: Icon(Icons.ac_unit),
-              tapTarget:
-                  Icon(Icons.ac_unit) //buttonBuilder(ValueKey("tap"),context),
-              )
+              title: Text("Increment counter"),
+              contentLocation: ContentLocation.above,
+              tapTarget: Icon(Icons.add)),
         },
         child: Scaffold(
             appBar: AppBar(
@@ -77,10 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureOverlays: {
                   FeatureOverlay(
                       featureId: CounterFeatureId,
-                      title: Text("Title"),
-                      tapTarget: Icon(Icons
-                          .access_alarm) //buttonBuilder(ValueKey("tap"),context),
-                      )
+                      title: Text("This is the counter"),
+                      tapTarget: Icon(Icons.access_alarm))
                 },
                 child: Center(
                   child: Column(
@@ -100,6 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 )),
             floatingActionButton: FeatureOverlayTarget(
                 featureId: IncrementFeatureId,
-                child: buttonBuilder(ValueKey("child"), context))));
+                child: FloatingActionButton(
+                    onPressed: _incrementCounter,
+                    tooltip: 'Increment',
+                    child: Icon(Icons.add)))));
   }
 }
