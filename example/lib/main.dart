@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return FeatureOverlayConfigProvider(
         key: providerKey,
+        enablePulsingAnimation: !disableAnimations,
         child: MaterialApp(
           title: 'Flutter Demo',
           theme: ThemeData(
@@ -27,7 +28,6 @@ class MyApp extends StatelessWidget {
           home: FeatureTourWidget(
             child: MyHomePage(title: 'Flutter Demo Home Page'),
             featureIds: [IncrementFeatureId, CounterFeatureId],
-            enablePulsingAnimation: !disableAnimations,
           ),
         ));
   }
