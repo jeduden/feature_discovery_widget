@@ -56,7 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
         featureOverlays: {
           FeatureOverlay(
               featureId: IncrementFeatureId,
-              title: Text("Increment counter"),
+              title: Text("Increment counter! With a very long title !"),
+              description: Text("Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
               contentLocation: ContentLocation.above,
               tapTarget: Icon(Icons.add)),
         },
@@ -68,7 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureOverlays: {
                   FeatureOverlay(
                       featureId: CounterFeatureId,
-                      title: Text("This is the counter"),
+                      title: Text("This is the counter. Longer Line ! Longer and Longer"),
+                      description: Text("It increases indefinetly.\nIt starts at 0."),
+                      contentLocation: ContentLocation.below,
                       tapTarget: Icon(Icons.access_alarm))
                 },
                 child: Center(

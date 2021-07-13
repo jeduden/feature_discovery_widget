@@ -367,7 +367,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     // and the background is hit instead.
 
     final tapTargetRadiusOffset = Offset(_TapTarget.maxRadius, _TapTarget.maxRadius)*sqrt(2);
-    final anchor = tapTargetRadiusOffset;
+    
+    final anchor = tapTargetRadiusOffset;//tapTargetRadiusOffset;
     
 
     // This will be assigned either above or below, i.e. trivial from
@@ -378,14 +379,26 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     final backgroundCenter = _backgroundPosition(anchor, contentLocation)!;
     final backgroundRadius = _backgroundRadius(anchor);
 
+    final leaderOffset = link.leader?.offset ?? Offset.zero;
+    final leaderSize = link.leaderSize ?? Size.zero;
+    final leaderCenterOffset = leaderSize.center(leaderOffset);
+    final contentCenterAnchorOffset = leaderCenterOffset-tapTargetRadiusOffset*2;
+    
     final contentOffsetMultiplier = _contentOffsetMultiplier(contentLocation);
-    final contentCenterPosition = _contentCenterPosition(anchor)!;
+    final contentCenterPosition = _contentCenterPosition(-contentCenterAnchorOffset)!;
 
     final contentWidth = min(_screenSize.width, _screenSize.height);
+    
+    var dx = contentCenterPosition.dx - contentWidth;
+    if(contentCenterAnchorOffset.dx + dx + contentWidth > _screenSize.width) {
+      dx = _screenSize.width - contentWidth + contentCenterAnchorOffset.dx;
+    }
+    else if(dx + contentCenterAnchorOffset.dx < 0) {
+      dx = - contentCenterAnchorOffset.dx;
+    }
 
-    final dx = contentCenterPosition.dx - contentWidth;
     final contentPosition = Offset(
-      (dx.isNegative) ? 0.0 : dx,
+      dx,
       anchor.dy +
           contentOffsetMultiplier * (44 + 20), // 44 is the tap target's radius.
     );
@@ -406,7 +419,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
-              CustomMultiChildLayout(
+              Positioned(left:0,right:0,top:0, bottom:0,child: CustomMultiChildLayout(
                 delegate: BackgroundContentLayoutDelegate(
                   overflowMode: widget.overflowMode,
                   contentPosition: contentPosition,
@@ -446,7 +459,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                     ),
                   ),
                 ],
-              ),
+              )),
               _Pulse(
                 state: _state,
                 transitionProgress: _animationController.value,
