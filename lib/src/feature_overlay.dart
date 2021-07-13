@@ -359,7 +359,16 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   }
 
   Widget _buildOverlay(BuildContext context) {
-    final anchor = Offset.zero;
+    final link = FeatureOverlayConfig.of(context).layerLink;
+    // Need to move the immediate child of follower to the left top
+    // corner to make sure the tap target
+    // is fully covered by the child.
+    // otherwise a top on the target is not detected,
+    // and the background is hit instead.
+
+    final tapTargetRadiusOffset = Offset(_TapTarget.maxRadius, _TapTarget.maxRadius)*sqrt(2);
+    final anchor = tapTargetRadiusOffset;
+    
 
     // This will be assigned either above or below, i.e. trivial from
     // widget.contentLocation will be converted to above or below.
@@ -390,9 +399,10 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
       if (widget.barrierDismissible) background,
       CompositedTransformFollower(
-          link: FeatureOverlayConfig.of(context).layerLink,
+          link: link,
           targetAnchor: Alignment.center,
           followerAnchor: Alignment.topLeft,
+          offset: -tapTargetRadiusOffset,
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
@@ -635,6 +645,8 @@ class _TapTarget extends StatelessWidget {
         return 1;
     }
   }
+
+  static double get maxRadius => 20 + 24;
 
   double get radius {
     switch (state) {
