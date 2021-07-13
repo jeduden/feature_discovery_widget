@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
 
 // The application under test.
-import 'package:example/main.dart' as app;
+import 'package:simple/main.dart' as app;
 
 extension TestWidgetTester on WidgetTester {
   Future<void> tapAndSettle(Finder finder) async {

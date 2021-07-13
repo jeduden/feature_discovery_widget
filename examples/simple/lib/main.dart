@@ -21,12 +21,12 @@ class MyApp extends StatelessWidget {
         key: providerKey,
         enablePulsingAnimation: !disableAnimations,
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Simple Feature Discovery',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
           home: FeatureTourWidget(
-            child: MyHomePage(title: 'Flutter Demo Home Page'),
+            child: MyHomePage(title: 'Simple Feature Discovery Example'),
             featureIds: [IncrementFeatureId, CounterFeatureId],
           ),
         ));
