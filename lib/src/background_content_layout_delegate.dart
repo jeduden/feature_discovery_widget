@@ -119,17 +119,17 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     // state and transition progress.
     switch (state) {
       case FeatureOverlayState.opening:
-        matchedRadius *= const Interval(0, 0.8, curve: Curves.easeOut)
+        matchedRadius *= const Interval(0, 1, curve: Curves.easeOut)
             .transform(transitionProgress!);
         break;
       case FeatureOverlayState.completing:
         matchedRadius += transitionProgress! * 40;
         break;
       case FeatureOverlayState.dismissing:
-        matchedRadius *= 0.8 - transitionProgress!;
+        matchedRadius *= 1 - transitionProgress!;
         break;
       case FeatureOverlayState.opened:
-        matchedRadius *= 0.8;
+        matchedRadius *= 1;
         break;
       case FeatureOverlayState.closed:
         matchedRadius = 0;

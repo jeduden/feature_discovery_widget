@@ -59,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text("Increment counter! With a very long title !"),
               description: Text("Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
               contentLocation: ContentLocation.above,
+              overflowMode: OverflowMode.extendBackground,
               tapTarget: Icon(Icons.add)),
         },
         child: Scaffold(

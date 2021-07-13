@@ -153,9 +153,8 @@ This package is work in progress and not yet published.
 
 ### To-do
 
-1. Fix text placement issues
-2. Transparent tap target?
-3. Unittests for statemachine
-4. Add example with a wider range of overlay configurations.
-5. Remove debug statements
-6. Publish package.
+1. Transparent tap target?
+2. Unittests for statemachine
+3. Add example with a wider range of overlay configurations.
+4. Remove debug statements
+5. Publish package.
