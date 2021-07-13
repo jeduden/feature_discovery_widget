@@ -150,3 +150,10 @@ class FeatureTourState extends State<FeatureTourWidget> {
 ## Status
 
 This package is work in progress and not yet published.
+
+### To-do
+
+1. Transparent tap target.
+2. Extend example with a wider range of overlay configurations.
+3. Fix text placement issues
+4. Publish package.

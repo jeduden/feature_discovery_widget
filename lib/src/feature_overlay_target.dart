@@ -1,21 +1,20 @@
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/material.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-
 import 'feature_overlay_config.dart';
 
-/// Wrap the [Widget] the feature overlay should focus on with this
-/// widget. The provided [featureId] references the feature overlay
-/// that will be overlayed of the [child] widget if the feature is active.
+/// Marks the [child] [Widget] witgh a [featureId].
+/// The [FeatureOverlay] with the corresponding [featureId] will use that to overlay this [child].
 /// 
 /// Please make sure that this widget is having all [IndexedFeatureOverlay]s as ancestors, 
 /// that contain feature overlays with this feature id.
 /// If this is not the case assertions about the paint order can occur:
 /// `LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.`
 class FeatureOverlayTarget extends StatelessWidget {
+
+  /// FeatureId of the [FeatureOverlay] to be shown
   final String featureId;
+
+  /// Target of the [FeatureOverlay] when shown
   final Widget child;
 
   const FeatureOverlayTarget(
