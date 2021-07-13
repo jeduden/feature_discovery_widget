@@ -7,7 +7,13 @@ import 'package:flutter/material.dart';
 import 'feature_overlay_config.dart';
 import 'feature_overlay_event.dart';
 
+/// Provides [FeatureOverlayConfig] to the [child],
+/// [FeatureOverlayConfigChangeNotifier] with [notifierOf] to modify the currently 
+/// active feature overlay,
+/// and an event stream of [FeatureOverlayEvent] via [eventStreamOf] to subscribe
+/// to all state changes.
 class FeatureOverlayConfigProvider extends StatefulWidget {
+  /// Widget to receive the [FeatureOverlayConfig]
   final Widget child;
 
   /// Enables/Disables the pulsing animation
@@ -43,16 +49,20 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
     return state;
   }
 
+  /// Returns [FeatureOverlayConfigChangeNotifier] to change the active feature
   static FeatureOverlayConfigChangeNotifier notifierOf(BuildContext context) {
     return FeatureOverlayConfigProviderState.of(context);
   }
 
+  /// Returns [Stream<FeatureOverlayEvent>] to subscribe to all [FeatureOverlayEvent] events.
   static Stream<FeatureOverlayEvent> eventStreamOf(BuildContext context) {
     return FeatureOverlayConfigProviderState.of(context).events;
   }
 }
 
+/// Provides [notifyActiveFeature] to change the active active feature.
 abstract class FeatureOverlayConfigChangeNotifier {
+  /// Change the active feature. Pass [null] to deactive all features.
   void notifyActiveFeature(String? featureId);
 }
 

@@ -14,6 +14,9 @@ import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 
 import 'feature_overlay_event.dart';
 
+/// Configures the contents and appearance of the feature overlay
+/// identified with the [featureId].
+/// Can only be placed in the [IndexFeatureOverlay.featureOverlays] set.
 class FeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
 
@@ -57,6 +60,7 @@ class FeatureOverlay extends StatefulWidget {
   /// to this [Widget] instead of as the [Key] of [DescribedFeatureOverlay].
   final Widget tapTarget;
 
+  /// Specifies how the content should be positioned relative to the tap target.
   final ContentLocation contentLocation;
 
   /// Controls what happens with content that overflows the background's area.

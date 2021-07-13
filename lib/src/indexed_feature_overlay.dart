@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 import 'feature_overlay.dart';
 import 'feature_overlay_config.dart';
 
+/// The [FeatureOverlay] listed in [featureOverlays] will appear on top of the [child]
+/// when the corresponding [FeatureOverlay.featureId] is active.
 class IndexedFeatureOverlay extends StatefulWidget {
+
+  /// A set of [FeatureOverlay]
   final Set<FeatureOverlay> featureOverlays;
+
+  /// The overlays will overlay this [child]. 
   final Widget child;
 
   const IndexedFeatureOverlay(

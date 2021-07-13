@@ -6,6 +6,9 @@ import 'package:flutter/rendering.dart';
 
 import 'feature_overlay_config.dart';
 
+/// Wrap the [Widget] the feature overlay should focus on with this
+/// widget. The provided [featureId] references the feature overlay
+/// that will be overlayed of the [child] widget if the feature is active.
 class FeatureOverlayTarget extends StatelessWidget {
   final String featureId;
   final Widget child;
