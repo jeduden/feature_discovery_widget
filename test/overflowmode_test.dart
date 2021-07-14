@@ -1,59 +1,83 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
+import 'package:feature_discovery_widget/src/indexed_feature_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'widgets.dart';
 
-/*
 void main() {
-group('OverflowMode', () {
-    const icon = Icons.error;
-    const featureId = 'feature';
+  final List<FeatureOverlayEvent> events = [];
+  final eventController = StreamController<FeatureOverlayEvent>();
 
-    // Declares what OverflowMode's should allow the button to be tapped.
-    const modes = <OverflowMode, bool>{
-      OverflowMode.ignore: false,
-      OverflowMode.extendBackground: false,
-      OverflowMode.wrapBackground: false,
-      OverflowMode.clipContent: true,
-    };
-
-    for (final modeEntry in modes.entries) {
-      testWidgets(modeEntry.key.toString(), (WidgetTester tester) async {
-        var triggered = false;
-
-        // The surface size is set to ensure that the minimum overlay background size
-        // does not cover the button, but the content does.
-        // The values here are somewhat arbitrary, but the main focus is ensuring that
-        // the minimum value (3e2 width in this case) is a lot smaller than the maximum value (4e3 height)
-        // because the background will use the minimum screen dimension as its radius and the icon needs
-        // to be outside of the background area because that would cover the icon for every entry mode.
-        //
-        // The Container that makes the content of the feature overlay of the test widget has a static
-        // height of 9e3, which ensures that the content definitely covers the 4e3 surface size height
-        // if OverflowMode.clipContent is not enabled.
+  setUpAll(() {
+    eventController.stream.listen((event) => events.add(event));
+  });
+  tearDownAll(() {
+    eventController.close();
+  });
+  setUp(() {
+    events.clear();
+  });
+  group('Content placement', () {
+    const screenSize = Size(3e2, 4e3);
+    final builder =
+        (OverflowMode mode, Alignment alignTarget, Rect expectedBackgroudRect) {
+      
+      testWidgets("$mode - $alignTarget", (WidgetTester tester) async {
         await (TestWidgetsFlutterBinding.ensureInitialized()
                 as TestWidgetsFlutterBinding)
-            .setSurfaceSize(const Size(3e2, 4e3));
+            .setSurfaceSize(screenSize);
 
-        await tester.pumpWidget(
-          OverflowingDescriptionFeature(
-            // This will be called when the content does not cover the icon.
-            onDismiss: (featureId) {
-              triggered = true;
-            },
-            featureId: featureId,
-            icon: icon,
-            mode: modeEntry.key,
-          ),
+        final featureId = "myFeature";
+        final key = GlobalKey();
+        final featureOverlay = FeatureOverlay(
+          key: key,
+          featureId: featureId,
+          overflowMode: mode,
+          tapTarget: Icon(Icons.ac_unit_sharp),
         );
+        await tester.pumpWidget(MediaQuery(
+            data: new MediaQueryData(size: screenSize),
+            child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: FeatureOverlayConfig(
+                  enablePulsingAnimation: false,
+                  layerLink: LayerLink(),
+                  activeFeatureId: featureId,
+                  eventsSink: eventController.sink,
+                  openDuration: Duration(milliseconds: 10),
+                  child: IndexedFeatureOverlay(
+                      featureOverlays: {
+                        featureOverlay,
+                      },
+                      child: Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Align(
+                            alignment: alignTarget,
+                            child: FeatureOverlayTarget(
+                                featureId: featureId,
+                                child: Icon(Icons.ac_unit)),
+                          ))),
+                ))));
+        await tester.pumpAndSettle(Duration(milliseconds: 11));
 
+        final foundOverlay = find.byKey(key);
 
-        await tester.pumpAndSettle();
+        final dynamic renderObject = tester.renderObject(find.byType(
+          Overlay,
+        ));
+        final dynamic renderObject2 = tester.renderObject(find.byKey(
+          key,
+        ));
 
-        await tester.tap(find.byIcon(icon));
-        expect(triggered, modeEntry.value);
+        expect(featureOverlay, equals(tester.widget(foundOverlay)));
+        expect(tester.getRect(foundOverlay), expectedBackgroudRect);
       });
-    }
+    };
+    builder(OverflowMode.clipContent, Alignment.bottomCenter,
+        Rect.fromLTRB(0, 0, screenSize.width, screenSize.height));
   });
-}*/
+}

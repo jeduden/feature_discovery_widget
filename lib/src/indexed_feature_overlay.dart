@@ -40,6 +40,22 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
     super.dispose();
   }
 
+  static void tryInsertEntry(GlobalKey<OverlayState> overlayKey, OverlayEntry entry,int tries) {
+    if(tries > 0) {
+      if(overlayKey.currentState != null) {
+        overlayKey.currentState!.insert(entry);
+      }
+      else {
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          tryInsertEntry(overlayKey, entry, tries-1);
+        });
+      }
+    }
+    else {
+      throw Exception("OverlayState wasn't available via global key.");
+    }
+  }
+
   @override
   void didChangeDependencies() {
     config = FeatureOverlayConfig.of(context);
@@ -58,14 +74,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
       if (activeFeatureOverlayFromThis != null) {
         currentFeatureOverlay = activeFeatureOverlayFromThis;
         currentOverlayEntry = OverlayEntry(builder: (_) => currentFeatureOverlay!);
-        if(overlayKey.currentState == null) {
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
-            overlayKey.currentState!.insert(currentOverlayEntry!);
-          });
-        }
-        else {
-          overlayKey.currentState!.insert(currentOverlayEntry!);
-        }
+        tryInsertEntry(overlayKey, currentOverlayEntry!, 3);
       }
     }
     super.didChangeDependencies();
