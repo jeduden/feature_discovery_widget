@@ -20,12 +20,15 @@ void main() {
   setUp(() {
     events.clear();
   });
-  group('Content placement', () {
+  group('Content placement snapshot test', () {
     const screenSize = Size(3e2, 4e3);
+    const titleHeight = 100.0;
+    const descriptionHeight = 21.0;
+    const tapTargetIconHeight = 33.0;
     final builder =
-        (OverflowMode mode, Alignment alignTarget, Rect expectedBackgroudRect) {
+        (String expected, OverflowMode mode, ContentLocation contentLocation, Alignment alignTarget, Rect expectedContentRect) {
       
-      testWidgets("$mode - $alignTarget", (WidgetTester tester) async {
+      testWidgets("$mode - $contentLocation - $alignTarget $expected", (WidgetTester tester) async {
         await (TestWidgetsFlutterBinding.ensureInitialized()
                 as TestWidgetsFlutterBinding)
             .setSurfaceSize(screenSize);
@@ -36,7 +39,10 @@ void main() {
           key: key,
           featureId: featureId,
           overflowMode: mode,
-          tapTarget: Icon(Icons.ac_unit_sharp),
+          contentLocation: contentLocation,
+          title: SizedBox(width: 100,height: titleHeight,),
+          description: SizedBox(width: 100,height: descriptionHeight,),
+          tapTarget: Icon(Icons.ac_unit_sharp,size:tapTargetIconHeight),
         );
         await tester.pumpWidget(MediaQuery(
             data: new MediaQueryData(size: screenSize),
@@ -64,20 +70,50 @@ void main() {
                 ))));
         await tester.pumpAndSettle(Duration(milliseconds: 11));
 
-        final foundOverlay = find.byKey(key);
-
-        final dynamic renderObject = tester.renderObject(find.byType(
-          Overlay,
-        ));
-        final dynamic renderObject2 = tester.renderObject(find.byKey(
-          key,
-        ));
-
-        expect(featureOverlay, equals(tester.widget(foundOverlay)));
-        expect(tester.getRect(foundOverlay), expectedBackgroudRect);
+        final actual = tester.getRect(find.byType(Content));
+        expect(actual.left, closeTo(expectedContentRect.left,0.1), reason:"left");
+        expect(actual.right, closeTo(expectedContentRect.right,0.1), reason: "right");
+        expect(actual.bottom, closeTo(expectedContentRect.bottom,0.1), reason: "bottom");
+        expect(actual.top, closeTo(expectedContentRect.top,0.1), reason: "top");
       });
     };
-    builder(OverflowMode.clipContent, Alignment.bottomCenter,
-        Rect.fromLTRB(0, 0, screenSize.width, screenSize.height));
+    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.topCenter,
+        
+        Rect.fromLTRB(0, 76, 180, 205));
+    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.topLeft,
+        
+        Rect.fromLTRB(0, 76.0, 180, 205));
+    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.topRight,
+        
+        Rect.fromLTRB(0, 76, 180, 205));
+    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.bottomCenter,
+        
+        Rect.fromLTRB(0, 3795, 180, 3924));
+    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.bottomLeft,
+        
+        Rect.fromLTRB(0, 3795, 180, 3924));
+    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.bottomRight,
+        
+        Rect.fromLTRB(0, 3795, 180, 3924));
+
+    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.center,
+        
+        Rect.fromLTRB(0, 1807, 180, 1936));
+    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.centerLeft,
+        
+        Rect.fromLTRB(0, 1807, 180, 1936));
+    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.centerRight,
+        
+        Rect.fromLTRB(0, 1807, 180, 1936));
+
+    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.center,
+        
+        Rect.fromLTRB(0, 2064, 180, 2193));
+    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.centerLeft,
+        
+        Rect.fromLTRB(0, 2064, 180, 2193));
+    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.centerRight,
+        
+        Rect.fromLTRB(0, 2064, 180, 2193));
   });
 }
