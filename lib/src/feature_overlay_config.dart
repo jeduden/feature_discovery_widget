@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 
 import 'feature_overlay_event.dart';
 
+@visibleForTesting
+/// Provides configuration to FeatureOverlays
+/// Use this to force behaviour in test scenarios
 class FeatureOverlayConfig extends InheritedWidget {
   /// Enables/Disables the pulsing animation
   /// Disable in tests since the pulse animation does not end.
@@ -14,12 +17,6 @@ class FeatureOverlayConfig extends InheritedWidget {
 
   /// Currently active feature id
   final String? activeFeatureId;
-
-  /// Currently active overlay
-  final OverlayEntry? activeOverlayEntry;
-
-  /// Currently request portal by feature
-  final String? requestedPortalId;
 
   /// Duration for overlay open animation.
   final Duration openDuration;
@@ -42,8 +39,6 @@ class FeatureOverlayConfig extends InheritedWidget {
     required this.layerLink,
     required this.eventsSink,
     this.activeFeatureId,
-    this.requestedPortalId,
-    this.activeOverlayEntry,
     this.openDuration: const Duration(milliseconds: 500),
     this.pulseDuration: const Duration(milliseconds: 1000),
     this.completeDuration: const Duration(milliseconds: 250),
@@ -59,8 +54,6 @@ class FeatureOverlayConfig extends InheritedWidget {
         layerLink != oldWidget.layerLink ||
         eventsSink != oldWidget.eventsSink ||
         activeFeatureId != oldWidget.activeFeatureId ||
-        requestedPortalId != oldWidget.requestedPortalId ||
-        activeOverlayEntry != oldWidget.activeOverlayEntry ||
         openDuration != oldWidget.openDuration ||
         pulseDuration != oldWidget.pulseDuration ||
         completeDuration != oldWidget.completeDuration ||

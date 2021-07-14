@@ -11,7 +11,9 @@ class TestWrapper extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(_) => MaterialApp(
+  Widget build(_) => FeatureOverlayConfigProvider(
+    enablePulsingAnimation: false,
+    child:MaterialApp(
         title: 'FeatureDiscoveryWidget Test',
         home: Scaffold(
           appBar: AppBar(
@@ -19,9 +21,9 @@ class TestWrapper extends StatelessWidget {
           ),
           body: child,
         ),
-      );
+      ));
 }
-
+/*
 @visibleForTesting
 class TestIcon extends StatefulWidget {
   final String featureId;
@@ -42,13 +44,8 @@ class TestIconState extends State<TestIcon> {
   @override
   Widget build(BuildContext context) {
     const icon = Icon(Icons.more_horiz);
-    return DescribedFeatureOverlay(
+    return FeatureOverlayTarget(
       featureId: widget.featureId,
-      // It is mandatory to disable the pulsing animation
-      // in order to use pumpAndSettle in tests.
-      // Otherwise, the tester can never settle as it requires frame sync.
-      enablePulsingAnimation: false,
-      child: icon,
       tapTarget: icon,
       title: const Text('This is it'),
       description: Text('Test has passed for ${widget.featureId}'),
@@ -66,11 +63,6 @@ class OverflowingDescriptionFeature extends StatelessWidget {
   final String? featureId;
   final IconData? icon;
 
-  final void Function(String)? onDismiss;
-  final void Function(String)? onComplete;
-  final void Function(String)? onFinishedOpening;
-  final void Function(String)? onFinishedClosing;
-
   final OverflowMode? mode;
 
   const OverflowingDescriptionFeature({
@@ -78,10 +70,6 @@ class OverflowingDescriptionFeature extends StatelessWidget {
     this.featureId,
     this.icon,
     this.mode,
-    this.onDismiss,
-    this.onComplete,
-    this.onFinishedOpening,
-    this.onFinishedClosing,
   }) : super(key: key);
 
   @override
@@ -92,28 +80,14 @@ class OverflowingDescriptionFeature extends StatelessWidget {
               children: <Widget>[
                 Align(
                   alignment: Alignment.topCenter,
-                  child: DescribedFeatureOverlay(
+                  child: 
+                  FeatureOverlayTarget(
                     featureId: featureId!,
-                    tapTarget: const Icon(Icons.arrow_drop_down_circle),
-                    description: Container(
-                      width: double.infinity,
-                      height: 9e3,
-                      color: const Color(0xff000000),
-                    ),
-                    contentLocation: ContentLocation.below,
-                    enablePulsingAnimation: false,
-                    overflowMode: mode!,
-                    initiallyShown: true,
-                    onDismiss: onDismiss,
-                    onComplete: onComplete,
-                    onFinishedClosing: onFinishedClosing,
-                    onFinishedOpening: onFinishedOpening,
                     child: Container(
                       width: 1e2,
                       height: 1e2,
                       color: const Color(0xfffffff),
-                    ),
-                  ),
+                    ))
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -191,3 +165,4 @@ class WidgetWithDisposableFeatureState
         ),
       );
 }
+*/

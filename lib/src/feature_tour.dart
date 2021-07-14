@@ -11,12 +11,12 @@ import 'feature_overlay_event.dart';
 /// using just plain flutter widgets.
 /// Best to be reimplemented using the statemanagement package that is used in the application.
 /// Expects to have [FeatureOverlayConfigProvider] as an ancestor.
-class FeatureTourWidget extends StatefulWidget {
+class FeatureTour extends StatefulWidget {
   final Widget child;
   /// List all feature ids in order.
   final List<String> featureIds;
 
-  FeatureTourWidget({
+  FeatureTour({
     Key? key,
     required this.child,
     required this.featureIds
@@ -28,12 +28,12 @@ class FeatureTourWidget extends StatefulWidget {
   }
 }
 
-class FeatureTourState extends State<FeatureTourWidget> {
+class FeatureTourState extends State<FeatureTour> {
   Iterator<String>? featuresIterator;
   StreamSubscription<FeatureOverlayEvent>? _subscription;
 
   @override
-  void didUpdateWidget(covariant FeatureTourWidget oldWidget) {
+  void didUpdateWidget(covariant FeatureTour oldWidget) {
     if (!listEquals(oldWidget.featureIds, widget.featureIds)) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         featuresIterator = null;

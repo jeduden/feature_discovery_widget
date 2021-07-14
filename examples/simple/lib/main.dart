@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: FeatureTourWidget(
+          home: FeatureTour(
             child: MyHomePage(title: 'Simple Feature Discovery Example'),
             featureIds: [IncrementFeatureId, CounterFeatureId],
           ),
