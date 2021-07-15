@@ -119,7 +119,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     // state and transition progress.
     switch (state) {
       case FeatureOverlayState.opening:
-        matchedRadius *= const Interval(0, 0.8, curve: Curves.easeOut)
+        matchedRadius *= const Interval(0, 1, curve: Curves.easeOut)
             .transform(transitionProgress!);
         break;
       case FeatureOverlayState.completing:
@@ -129,6 +129,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
         matchedRadius *= 1 - transitionProgress!;
         break;
       case FeatureOverlayState.opened:
+        matchedRadius *= 1;
         break;
       case FeatureOverlayState.closed:
         matchedRadius = 0;
@@ -137,6 +138,8 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
         // The switch statement should be exhaustive.
         throw ArgumentError.value(state);
     }
+
+    matchedRadius = max(matchedRadius, 0);
 
     layoutChild(
         BackgroundContentLayout.background,
@@ -164,6 +167,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(BackgroundContentLayoutDelegate oldDelegate) =>
+      oldDelegate.transitionProgress != transitionProgress ||
       oldDelegate.overflowMode != overflowMode ||
       oldDelegate.contentPosition != contentPosition ||
       oldDelegate.backgroundCenter != backgroundCenter ||

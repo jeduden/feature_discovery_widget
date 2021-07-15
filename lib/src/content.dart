@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:feature_discovery_widget/src/enums.dart';
 import 'package:feature_discovery_widget/src/render_clip_content.dart';
 
+@visibleForTesting
 class Content extends StatelessWidget {
   final FeatureOverlayState state;
   final double transitionProgress;
