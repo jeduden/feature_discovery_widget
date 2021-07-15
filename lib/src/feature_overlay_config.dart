@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -32,12 +33,15 @@ class FeatureOverlayConfig extends InheritedWidget {
 
   final LayerLink layerLink;
 
+  final FeatureTourPersistence featureTourPersistence;
+
   FeatureOverlayConfig({
     Key? key,
     required Widget child,
     this.enablePulsingAnimation: true,
     required this.layerLink,
     required this.eventsSink,
+    required this.featureTourPersistence,
     this.activeFeatureId,
     this.openDuration: const Duration(milliseconds: 500),
     this.pulseDuration: const Duration(milliseconds: 1000),

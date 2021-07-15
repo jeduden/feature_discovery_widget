@@ -16,11 +16,9 @@ class FeatureTour extends StatefulWidget {
 
   /// List all feature ids in order.
   final List<String> featureIds;
-  final FeatureTourPersistence persistence;
 
   FeatureTour(
       {Key? key,
-      required this.persistence,
       required this.child,
       required this.featureIds})
       : super(key: key);
@@ -32,16 +30,30 @@ class FeatureTour extends StatefulWidget {
 }
 
 class FeatureTourState extends State<FeatureTour> {
-  StreamSubscription<FeatureOverlayEvent>? _subscription;
+  StreamSubscription<FeatureOverlayEvent>? _overlayEventsSubscription;
+  StreamSubscription<Set<String>>? _completedFeaturesStreamSubscription;
+  Set<String>? lastCompletedFeatures;
 
   @override
   void didUpdateWidget(covariant FeatureTour oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (!listEquals(oldWidget.featureIds, widget.featureIds)) {
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
+        final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf(context);
+        persistence.setTourFeatureIds(widget.featureIds);
         _updateActive();
       });
     }
-    super.didUpdateWidget(oldWidget);
+  }
+
+  void _subscribeToCompletedFeaturesStream(context) 
+  {
+    _completedFeaturesStreamSubscription?.cancel();
+    final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf(context);
+    _completedFeaturesStreamSubscription = persistence.completedFeaturesStream.listen((event) {
+      lastCompletedFeatures = event;
+      _updateActive();
+    });
   }
 
   @override
@@ -51,14 +63,18 @@ class FeatureTourState extends State<FeatureTour> {
     });
 
     final events = FeatureOverlayConfigProvider.eventStreamOf(context);
+    final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf(context);
 
-    _subscription?.cancel();
-    _subscription = events.listen((event) async {
+    _subscribeToCompletedFeaturesStream(context);
+    persistence.setTourFeatureIds(widget.featureIds);
+
+    _overlayEventsSubscription?.cancel();
+    _overlayEventsSubscription = events.listen((event) async {
       if (event.previousState == FeatureOverlayState.opened) {
         if (event.state == FeatureOverlayState.completing) {
-          await _completeActive(event.featureId);
+          await persistence.completeFeature(context,event.featureId);
         } else {
-          await _dismissActive(event.featureId);
+          await persistence.dismissFeature(context,event.featureId);
         }
       }
     });
@@ -67,23 +83,13 @@ class FeatureTourState extends State<FeatureTour> {
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _overlayEventsSubscription?.cancel();
+    _completedFeaturesStreamSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _completeActive(String id) async {
-    await widget.persistence.completeFeature(id,widget.featureIds);
-    await _updateActive();
-  }
-
-  Future<void> _dismissActive(String id) async {
-    await widget.persistence.dismissFeature(id,widget.featureIds);
-    await _updateActive();
-  }
-
   Future<void> _updateActive() async {
-    final completed = await widget.persistence.completedFeatures(widget.featureIds);
-    final iter = widget.featureIds.skipWhile((id) => completed.contains(id)).iterator;
+    final iter = widget.featureIds.skipWhile((id) => lastCompletedFeatures?.contains(id) ?? false).iterator;
 
     if(iter.moveNext()) {
       _setActive(iter.current);

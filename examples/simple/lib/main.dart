@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,29 +15,42 @@ const CounterFeatureId = "Counter";
 const HomePortal = "HomePortal";
 const providerKey = GlobalObjectKey("provider");
 
+
+// move instanciation to ConfigProvider
+
 class FeatureTourPersistenceWithSharedPreferences
     implements FeatureTourPersistence {
   static const keyId = "completedFeatures";
 
   final BuildContext context;
+  final _streamController = StreamController<Set<String>>();
+  Set<String>? _lastCompletedSet;
+  List<String>? _tourFeatureIds;
 
   FeatureTourPersistenceWithSharedPreferences(this.context);
 
   @override
-  Future<Set<String>> completedFeatures(List<String> featureIds) async {
+  Stream<Set<String>> get completedFeaturesStream => _streamController.stream;
+
+  @override
+  Future<void> setTourFeatureIds(List<String> tourFeatureIds) async {
+    _tourFeatureIds = tourFeatureIds;
+  }
+
+  void _storeSet(Set<String>? featureIds) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return (prefs.getStringList(keyId) ?? []).toSet();
+    await prefs.setStringList(keyId, featureIds?.toList()??[]);
+    _streamController.add(featureIds??Set.identity()); 
   }
 
   @override
-  Future<void> completeFeature(String featureId,List<String> featureIds) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final newCompletedSet = (await completedFeatures(featureIds))..add(featureId);
-    await prefs.setStringList(keyId, newCompletedSet.toList());
+  Future<void> completeFeature(String featureId) async {
+    final newCompletedSet = Set<String>.from(_lastCompletedSet??Set.identity())..add(featureId);
+    _storeSet(newCompletedSet);
   }
 
   @override
-  Future<void> dismissFeature(String featureId,List<String> featureIds) async {
+  Future<void> dismissFeature(String featureId) async {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       showDialog(
           context: context,
@@ -45,9 +60,7 @@ class FeatureTourPersistenceWithSharedPreferences
               actions: [
                 TextButton(
                     onPressed: () async {
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      prefs.setStringList(keyId, featureIds);
+                      _storeSet(_tourFeatureIds?.toSet());
                       Navigator.of(context).pop();
                     },
                     child: Text('Yes')),
@@ -79,6 +92,7 @@ class MyApp extends StatelessWidget {
     return FeatureOverlayConfigProvider(
         key: providerKey,
         enablePulsingAnimation: !disableAnimations,
+        persistenceBuilder: () => FeatureTourPersistenceWithSharedPreferences(context),
         child: MaterialApp(
           title: 'Simple Feature Discovery',
           theme: ThemeData(
@@ -90,7 +104,6 @@ class MyApp extends StatelessWidget {
             // we don't need to store persistent in a state
             // since all stateful information is passed into the 
             // methods.
-            persistence: FeatureTourPersistenceWithSharedPreferences(context),
             child: MyHomePage(title: 'Simple Feature Discovery Example'),
             featureIds: [IncrementFeatureId, CounterFeatureId],
           )),
