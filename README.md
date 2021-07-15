@@ -1,6 +1,6 @@
 # Feature Discovery Widget
 
-This package is based on the [feature_discovery package](https://pub.dev/packages/feature_discovery/), however the major changes have been on the interface and the implementation:
+This package is based on the [feature_discovery package](https://pub.dev/packages/feature_discovery/), however the major changes have been done:
 
 - This package does not have any dependency except Flutter.
 - Statemanagement needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, but is not persistent.
