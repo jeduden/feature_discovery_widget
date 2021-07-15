@@ -3,7 +3,7 @@
 This package is based on the [feature_discovery package](https://pub.dev/packages/feature_discovery/), however the major changes have been done:
 
 - This package does not have any dependency except Flutter.
-- Statemanagement needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, but is not persistent.
+- Persistence needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, but requires an instance of persistence interface. 
 - The application decides where in the widget tree feature overlay's can appear.
 - Includes changes/fixes regarding layout, animation and painting.
 
@@ -62,96 +62,36 @@ Wrap the target that a feature overlay should describe with `FeatureOverlayTarge
 
 Please check the docs for further appearance and configuration options.
 
-### Listening for events and change the active feature
+### Feature Tour Persistence Implementation
 
-#### Plain Flutter
-
-Example implementation, that works without an statemanagement package.
+Example implementation using the [shared_preferences](https://pub.dev/packages/shared_preferences) package.
 
 ```dart
-class FeatureTourWidget extends StatefulWidget {
-  final Widget child;
-  final List<String> featureIds;
 
-  FeatureTourWidget({
-    Key? key,
-    required this.child,
-    required this.featureIds,
-  }) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() {
-    return FeatureTourState();
-  }
-}
-
-class FeatureTourState extends State<FeatureTourWidget> {
-  Iterator<String>? featuresIterator;
-  StreamSubscription<FeatureOverlayEvent>? _subscription;
-
-  @override
-  void didUpdateWidget(covariant FeatureTourWidget oldWidget) {
-    if (!listEquals(oldWidget.featureIds, widget.featureIds)) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        featuresIterator = null;
-        _ensureActiveInitialized();
-      });
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void didChangeDependencies() {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      _ensureActiveInitialized();
-    });
-
-    final events = FeatureOverlayConfigProvider.eventStreamOf(context);
+class FeatureTourPersistenceWithSharedPreferences implements FeatureTourPersistence {
+  static const keyId = "completedFeatures";
     
-    _subscription?.cancel();
-    _subscription = events.listen((event) {
-      if(event.state == FeatureOverlayState.closed) {
-        if(event.previousState == FeatureOverlayState.completing) { 
-          _nextActive();
-        }
-        else {
-          _setActive(null);
-        }
-      }
-    });
-    super.didChangeDependencies();
+  @override
+  Future<Set<String>> completedFeatures() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return (prefs.getStringList(keyId) ?? []).toSet();
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
+  Future<void> completeFeature(String featureId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final newCompletedSet = completedFeatures()
+                        ..add(featureId);
+    await prefs.setStringList(keyId, newCompletedSet.toList());
   }
 
-  void _ensureActiveInitialized() {
-    if (featuresIterator == null) {
-      featuresIterator = widget.featureIds.iterator;
-      _nextActive();
-    }
-  }
-
-  void _nextActive() {
-    if (featuresIterator!.moveNext())
-      _setActive(featuresIterator!.current);
-    else
-      _setActive(null);
-  }
-
-  void _setActive(String? active) {
-    final notifier = FeatureOverlayConfigProvider.notifierOf(context);
-    notifier.notifyActiveFeature(active);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
+  // Helpful to reset tutorial. but not part of the interface [FeatureTourPersistence]
+  Future<void> clearCompletions() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove(keyId);
   }
 }
+
 ```
 
 ## Status
