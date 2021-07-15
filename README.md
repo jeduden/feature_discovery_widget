@@ -2,15 +2,22 @@
 
 This package is based on the [feature_discovery package](https://pub.dev/packages/feature_discovery/), however the major changes have been on the interface and the implementation:
 
-- This package does not have any dependency except on Flutter.
-- Statemanagement needs to be implemented by the app.
+- This package does not have any dependency except Flutter.
+- Statemanagement needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, but is not persistent.
 - The application decides where in the widget tree feature overlay's can appear.
-
-Further the following behaviours are being investigated:
-- Have a way for the child to be the tap target
-- Difference between barrier and background
+- Includes changes/fixes regarding layout, animation and painting.
 
 ## Usage
+
+### Install
+
+Add to pubspec.yaml:
+
+```yaml
+dependencies:
+  feature_discovery_widget:
+    git: https://github.com/jeduden/feature_discovery_widget.git
+```
 
 ### FeatureOverlayConfigProvider
 
@@ -149,12 +156,12 @@ class FeatureTourState extends State<FeatureTourWidget> {
 
 ## Status
 
-This package is work in progress and not yet published.
+This package is works for some configurations and is not (yet?) published on pub.dev.
 
 ### To-do
 
-1. Transparent tap target?
-2. Unittests for statemachine
-3. Add example with a wider range of overlay configurations.
-4. Remove debug statements
-5. Publish package.
+1. Support other feature discovery designs that work non-icon widgets?
+2. Add example with a wider range of configurations.
+3. Remove debug statements
+4. Figure out / work on better test coverage
+5. Publish package?

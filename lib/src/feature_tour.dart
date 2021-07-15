@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 import 'feature_overlay_event.dart';
 
-/// Simple feature discovery guided tour
-/// using just plain flutter widgets.
+/// Simple feature discovery guided tour using just plain flutter widgets.
+/// Does not persist completed feature ids.
 /// Best to be reimplemented using the statemanagement package that is used in the application.
 /// Expects to have [FeatureOverlayConfigProvider] as an ancestor.
 class FeatureTour extends StatefulWidget {
