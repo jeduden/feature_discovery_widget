@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'feature_overlay.dart';
@@ -6,11 +7,10 @@ import 'feature_overlay_config.dart';
 /// The [FeatureOverlay] listed in [featureOverlays] will appear on top of the [child]
 /// when the corresponding [FeatureOverlay.featureId] is active.
 class IndexedFeatureOverlay extends StatefulWidget {
-
   /// A set of [FeatureOverlay]
   final Set<FeatureOverlay> featureOverlays;
 
-  /// The overlays will overlay this [child]. 
+  /// The overlays will overlay this [child].
   final Widget child;
 
   const IndexedFeatureOverlay(
@@ -31,6 +31,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
 
   @override
   void initState() {
+    print("IndexFeatureOverlayState.initState");
     overlayKey = GlobalKey<OverlayState>();
     super.initState();
   }
@@ -40,48 +41,60 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
     super.dispose();
   }
 
-  static void tryInsertEntry(GlobalKey<OverlayState> overlayKey, OverlayEntry entry,int tries) {
-    if(tries > 0) {
-      if(overlayKey.currentState != null) {
+  static void tryInsertEntry(
+      GlobalKey<OverlayState> overlayKey, OverlayEntry entry, int tries) {
+    if (tries > 0) {
+      if (overlayKey.currentState != null) {
         overlayKey.currentState!.insert(entry);
-      }
-      else {
+      } else {
         WidgetsBinding.instance!.addPostFrameCallback((_) {
-          tryInsertEntry(overlayKey, entry, tries-1);
+          tryInsertEntry(overlayKey, entry, tries - 1);
         });
       }
-    }
-    else {
+    } else {
       throw Exception("OverlayState wasn't available via global key.");
     }
   }
 
+  get featureOverlayList => widget.featureOverlays.toList();
+
+  get activeIndex => featureOverlayList
+      .indexWhere((element) => element.featureId == config?.activeFeatureId);
+
   @override
   void didChangeDependencies() {
+    print("IndexFeatureOverlayState.didChangeDependencies");
     config = FeatureOverlayConfig.of(context);
-    final list =  widget.featureOverlays.toList();
-    final activeIndex = list
-        .indexWhere((element) => element.featureId == config?.activeFeatureId);
+
+    print("IndexFeatureOverlayState.didChangeDependencies: activeIndex $activeIndex");
+
     FeatureOverlay? activeFeatureOverlayFromThis;
-    if(activeIndex>=0) {
-        activeFeatureOverlayFromThis = list[activeIndex];
+    if (activeIndex >= 0) {
+      activeFeatureOverlayFromThis = featureOverlayList[activeIndex];
     }
-    if(activeFeatureOverlayFromThis != currentFeatureOverlay) {
-      if(currentOverlayEntry?.mounted??false)
+    
+    if (activeFeatureOverlayFromThis != currentFeatureOverlay) {
+      print("IndexFeatureOverlayState.didChangeDependencies: activeFeatureOverlayFromThis $activeFeatureOverlayFromThis changed");
+      if (currentOverlayEntry?.mounted ?? false)
         currentOverlayEntry?.remove();
       else
         currentOverlayEntry = null;
       if (activeFeatureOverlayFromThis != null) {
         currentFeatureOverlay = activeFeatureOverlayFromThis;
-        currentOverlayEntry = OverlayEntry(builder: (_) => currentFeatureOverlay!);
+        currentOverlayEntry =
+            OverlayEntry(builder: (_) => currentFeatureOverlay!);
         tryInsertEntry(overlayKey, currentOverlayEntry!, 3);
       }
+    }
+    else {
+      print("IndexFeatureOverlayState.didChangeDependencies: activeFeatureOverlayFromThis $activeFeatureOverlayFromThis did not change.");
     }
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("IndexFeatureOverlayState.build");
     return Stack(children: <Widget>[
       widget.child,
       Overlay(
@@ -89,5 +102,14 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
         initialEntries: [],
       )
     ]);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty(
+          "featureOverlayList", List.from(featureOverlayList).toString()))
+      ..add(StringProperty("activeIndex", activeIndex.toString()));
   }
 }

@@ -38,23 +38,24 @@ class FeatureTourPersistenceWithSharedPreferences
   }
 
   void _storeSet(Set<String>? featureIds) async {
+    print("Storing $featureIds");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(keyId, featureIds?.toList()??[]);
     _streamController.add(featureIds??Set.identity()); 
   }
 
   @override
-  Future<void> completeFeature(String featureId) async {
+  Future<void> completeFeature(BuildContext context, String featureId) async {
     final newCompletedSet = Set<String>.from(_lastCompletedSet??Set.identity())..add(featureId);
     _storeSet(newCompletedSet);
   }
 
   @override
-  Future<void> dismissFeature(String featureId) async {
+  Future<void> dismissFeature(BuildContext context, String featureId) async {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       showDialog(
           context: context,
-          builder: (BuildContext ctx) {
+          builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Abort Tutorial?'),
               actions: [
@@ -76,9 +77,8 @@ class FeatureTourPersistenceWithSharedPreferences
     });
   }
 
-  static Future<void> clearCompletions() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(keyId);
+  Future<void> clearCompletions() async {
+    _storeSet(Set<String>.identity());
   }
 }
 
@@ -189,8 +189,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: Theme.of(context).textTheme.headline4,
                           )),
                       TextButton(onPressed: () async {
-                        await FeatureTourPersistenceWithSharedPreferences.clearCompletions();
-                        FeatureOverlayConfigProvider.notifierOf(context).notifyActiveFeature(null);
+                        final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf<FeatureTourPersistenceWithSharedPreferences>(context);
+                        await persistence.clearCompletions();
                       }, child: Text("Restart tutorial"))
                     ],
                   ),

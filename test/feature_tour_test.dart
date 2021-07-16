@@ -6,26 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'mocks.dart';
 import 'widgets.dart';
-
-class MockPersistence extends Mock implements FeatureTourPersistence {
-
-   @override
-   Stream<Set<String>> completedFeaturesStream(List<String>? tourFeatureIds) {
-      return super.noSuchMethod(Invocation.method(#completedFeaturesStream, [tourFeatureIds]),
-        returnValue: Future.value(StreamController<Set<String>>().stream));
-   }
-   @override
-   Future<void> completeFeature(String? featureId,List<String>? tourFeatureIds) async {
-      return super.noSuchMethod(Invocation.method(#completeFeature, [featureId,tourFeatureIds]),
-        returnValue: Future.value());
-   }
-   @override
-   Future<void> dismissFeature(String? featureId,List<String>? tourFeatureIds) async {
-      return super.noSuchMethod(Invocation.method(#dismissFeature, [featureId,tourFeatureIds]),
-        returnValue: Future.value());
-   }
-}
 
 void main() {
   late MockPersistence mockPersistence;
@@ -34,12 +16,13 @@ void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
-  tearDownAll(() {
-  });
+  tearDownAll(() {});
   setUp(() {
-    completeFeaturesStreamController = StreamController<Set<String>>.broadcast();
+    completeFeaturesStreamController =
+        StreamController<Set<String>>.broadcast();
     mockPersistence = MockPersistence();
-    when(mockPersistence.completedFeaturesStream(any)).thenReturn(completeFeaturesStreamController.stream);
+    when(mockPersistence.completedFeaturesStream)
+        .thenAnswer((_) => completeFeaturesStreamController.stream);
   });
   tearDown(() {
     completeFeaturesStreamController.close();
@@ -49,108 +32,138 @@ void main() {
     testWidgets(
         "completed first feature before initialization and moves to first not completed feature",
         (WidgetTester tester) async {
-      completeFeaturesStreamController.add({"a"});
+      
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      completeFeaturesStreamController.onListen = () => completeFeaturesStreamController.add(<String>{"a"});  
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
+      await tester.pumpWidget(Builder(builder: (context) {
         return FeatureOverlayConfigProvider(
             key: providerKey,
             enablePulsingAnimation: false,
-            child: FeatureTour(
-              persistence: mockPersistence,
-              featureIds: ["a", "b"], child: Container()));
-      })));
+            persistenceBuilder: () => mockPersistence,
+            child: FeatureTour(featureIds: ["a", "b"], child: Container()));
+      }));
       await tester.pumpAndSettle();
+      verify(mockPersistence.setTourFeatureIds(["a", "b"].toList()));
       expect(providerKey.currentState!.activeFeatureId, equals("b"));
     });
 
-    testWidgets(
-        "shows first feature if stream has no result yet",
+    testWidgets("shows first feature if stream has no result yet",
         (WidgetTester tester) async {
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfigProvider(
-            key: providerKey,
-            enablePulsingAnimation: false,
-            child: FeatureTour(
-              persistence: mockPersistence,
-              featureIds: ["a", "b"], child: Container()));
-      })));
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["a", "b"], child: Container()))));
       await tester.pumpAndSettle();
-      verify(mockPersistence.completedFeaturesStream(any)).called(1);
+      verifyInOrder([
+        mockPersistence.setTourFeatureIds(["a", "b"].toList()),
+        mockPersistence.completedFeaturesStream]);
       expect(providerKey.currentState!.activeFeatureId, equals("a"));
     });
 
-  testWidgets(
-        "moves to next not completed feature on completion",
+    testWidgets("calls setTourFeatureIds if featureIds change",
         (WidgetTester tester) async {
-
-      when(mockPersistence.completeFeature(any,any)).thenAnswer((_) async => Future.value());
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfigProvider(
-            key: providerKey,
-            enablePulsingAnimation: false,
-            child: FeatureTour(
-              persistence: mockPersistence,
-              featureIds: ["a", "b"], child: Container()));
-      })));
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["a", "b"], child: Container()))));
       await tester.pumpAndSettle();
-      verify(mockPersistence.completedFeaturesStream(any)).called(1);
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["d", "e"], child: Container()))));
+      verifyInOrder([
+        mockPersistence.setTourFeatureIds(["a", "b"].toList()),
+        mockPersistence.setTourFeatureIds(["d", "e"].toList())]);
+    });
+
+    testWidgets("moves to next not completed feature on completion",
+        (WidgetTester tester) async {
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      when(mockPersistence.completeFeature(any, any))
+          .thenAnswer((_) async => Future.value());
+      final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["a", "b"], child: Container()))));
+      await tester.pumpAndSettle();
+      verifyInOrder([
+        mockPersistence.setTourFeatureIds(["a", "b"].toList()),
+        mockPersistence.completedFeaturesStream]);
       expect(providerKey.currentState!.activeFeatureId, equals("a"));
-      verifyNever(mockPersistence.completeFeature("a",["a", "b"].toList()));
-      providerKey.currentState!.eventsController.sink.add(
-        FeatureOverlayEvent(featureId: "a", state: FeatureOverlayState.completing,previousState: FeatureOverlayState.opened));
+      verifyNever(mockPersistence.completeFeature(any, "a"));
+      providerKey.currentState!.eventsController.sink.add(FeatureOverlayEvent(
+          featureId: "a",
+          state: FeatureOverlayState.completing,
+          previousState: FeatureOverlayState.opened));
       await tester.pumpAndSettle();
-      verify(mockPersistence.completeFeature("a",["a", "b"].toList())).called(1);
+      verify(mockPersistence.completeFeature(any, "a")).called(1);
     });
 
     testWidgets(
         "mark feature as dismissed not when dismissed. call complete features again",
         (WidgetTester tester) async {
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      when(mockPersistence.completeFeature(any, any))
+          .thenAnswer((_) async => Future.value());
+      when(mockPersistence.dismissFeature(any, any))
+          .thenAnswer((_) async => Future.value());
 
-      when(mockPersistence.completeFeature(any,any)).thenAnswer((_) async => Future.value());
-      when(mockPersistence.dismissFeature(any,any)).thenAnswer((_) async => Future.value());
-      
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfigProvider(
-            key: providerKey,
-            enablePulsingAnimation: false,
-            child: FeatureTour(
-              persistence: mockPersistence,
-              featureIds: ["a", "b"], child: Container()));
-      })));
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["a", "b"], child: Container()))));
       await tester.pumpAndSettle();
-      verify(mockPersistence.completedFeaturesStream(any)).called(1);
+      verify(mockPersistence.completedFeaturesStream).called(1);
       expect(providerKey.currentState!.activeFeatureId, equals("a"));
-      verifyNever(mockPersistence.completeFeature("a",["a", "b"].toList()));
-      providerKey.currentState!.eventsController.sink.add(
-        FeatureOverlayEvent(featureId: "a", state: FeatureOverlayState.dismissing,previousState: FeatureOverlayState.opened));
+      verifyNever(mockPersistence.completeFeature(any, "a"));
+      providerKey.currentState!.eventsController.sink.add(FeatureOverlayEvent(
+          featureId: "a",
+          state: FeatureOverlayState.dismissing,
+          previousState: FeatureOverlayState.opened));
       await tester.pumpAndSettle();
-      verifyNever(mockPersistence.completeFeature(any,any));
-      verify(mockPersistence.dismissFeature("a",["a", "b"].toList()));
-      verify(mockPersistence.completedFeaturesStream(any)).called(1);
+      verifyNever(mockPersistence.completeFeature(any, any));
+      verify(mockPersistence.dismissFeature(any, "a"));
     });
 
-    testWidgets(
-        "when features are completed then no feature will be activated",
+    testWidgets("when features are completed then no feature will be activated",
         (WidgetTester tester) async {
-      
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfigProvider(
-            key: providerKey,
-            enablePulsingAnimation: false,
-            child: FeatureTour(
-              persistence: mockPersistence,
-              featureIds: ["a", "b"], child: Container()));
-      })));
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["a", "b"], child: Container()))));
       await tester.pumpAndSettle();
       expect(providerKey.currentState!.activeFeatureId, equals("a"));
       completeFeaturesStreamController.add({"a"});
       await tester.pumpAndSettle();
       expect(providerKey.currentState!.activeFeatureId, equals("b"));
-      completeFeaturesStreamController.add({"a","b"});
+      completeFeaturesStreamController.add({"a", "b"});
       await tester.pumpAndSettle();
       expect(providerKey.currentState!.activeFeatureId, equals(null));
     });

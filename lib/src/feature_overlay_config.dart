@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import 'feature_overlay_event.dart';
 
-@visibleForTesting
 /// Provides configuration to FeatureOverlays
 /// Use this to force behaviour in test scenarios
 class FeatureOverlayConfig extends InheritedWidget {
@@ -58,6 +57,7 @@ class FeatureOverlayConfig extends InheritedWidget {
         layerLink != oldWidget.layerLink ||
         eventsSink != oldWidget.eventsSink ||
         activeFeatureId != oldWidget.activeFeatureId ||
+        featureTourPersistence != oldWidget.featureTourPersistence ||
         openDuration != oldWidget.openDuration ||
         pulseDuration != oldWidget.pulseDuration ||
         completeDuration != oldWidget.completeDuration ||

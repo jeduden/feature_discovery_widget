@@ -57,17 +57,17 @@ class FeatureTourState extends State<FeatureTour> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       _updateActive();
     });
+    
+    final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf(context);
+    await persistence.setTourFeatureIds(widget.featureIds);
+    
+    _subscribeToCompletedFeaturesStream(context);
 
     final events = FeatureOverlayConfigProvider.eventStreamOf(context);
-    final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf(context);
-
-    _subscribeToCompletedFeaturesStream(context);
-    persistence.setTourFeatureIds(widget.featureIds);
-
     _overlayEventsSubscription?.cancel();
     _overlayEventsSubscription = events.listen((event) async {
       if (event.previousState == FeatureOverlayState.opened) {

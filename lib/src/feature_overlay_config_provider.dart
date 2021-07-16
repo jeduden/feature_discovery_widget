@@ -64,9 +64,10 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
     return FeatureOverlayConfigProviderState.of(context).events;
   }
 
-    /// Returns [FeatureTourPersistence] 
-  static FeatureTourPersistence featureTourPersistenceOf(BuildContext context) {
-    return FeatureOverlayConfigProviderState.of(context).featureTourPersistence;
+  /// Returns [FeatureTourPersistence] 
+    
+  static T featureTourPersistenceOf<T extends FeatureTourPersistence>(BuildContext context) {
+    return FeatureOverlayConfigProviderState.of(context).featureTourPersistence as T;
   }
 }
 
