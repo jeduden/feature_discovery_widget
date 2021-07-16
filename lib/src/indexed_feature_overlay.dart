@@ -85,6 +85,12 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
             OverlayEntry(builder: (_) => currentFeatureOverlay!);
         tryInsertEntry(overlayKey, currentOverlayEntry!, 3);
       }
+      else {
+        // need to this test.....
+        
+        //currentFeatureOverlay = null;
+        //currentOverlayEntry = null;
+      }
     }
     else {
       print("IndexFeatureOverlayState.didChangeDependencies: activeFeatureOverlayFromThis $activeFeatureOverlayFromThis did not change.");

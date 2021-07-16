@@ -70,7 +70,7 @@ class FeatureTourState extends State<FeatureTour> {
     final events = FeatureOverlayConfigProvider.eventStreamOf(context);
     _overlayEventsSubscription?.cancel();
     _overlayEventsSubscription = events.listen((event) async {
-      if (event.previousState == FeatureOverlayState.opened) {
+      if (event.previousState == FeatureOverlayState.opened || event.previousState == FeatureOverlayState.opening) {
         if (event.state == FeatureOverlayState.completing) {
           await persistence.completeFeature(context,event.featureId);
         } else {

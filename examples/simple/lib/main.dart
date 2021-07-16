@@ -67,6 +67,7 @@ class FeatureTourPersistenceWithSharedPreferences
                     child: Text('Yes')),
                 TextButton(
                     onPressed: () {
+                      _storeSet(_lastCompletedSet?.toSet());
                       Navigator.of(context).pop();
                       // dont do anything to show the overlay again
                     },

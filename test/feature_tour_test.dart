@@ -147,6 +147,35 @@ void main() {
       verify(mockPersistence.dismissFeature(any, "a"));
     });
 
+     testWidgets(
+        "mark feature as dismissed when dismissing during opening.",
+        (WidgetTester tester) async {
+      when(mockPersistence.setTourFeatureIds(any))
+          .thenAnswer((_) async => Future.value());
+      when(mockPersistence.completeFeature(any, any))
+          .thenAnswer((_) async => Future.value());
+      when(mockPersistence.dismissFeature(any, any))
+          .thenAnswer((_) async => Future.value());
+
+      final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              openDuration: Duration(milliseconds:2000),
+              persistenceBuilder: () => mockPersistence,
+              child: FeatureTour(featureIds: ["a", "b"], child: Container()))));
+      await tester.pump(Duration(milliseconds: 1000));
+      expect(providerKey.currentState!.activeFeatureId, equals("a"));
+
+      providerKey.currentState!.eventsController.add(FeatureOverlayEvent(featureId: "a", 
+        state: FeatureOverlayState.dismissing,
+      previousState: FeatureOverlayState.opening
+      ));
+      await tester.pumpAndSettle();
+      verify(mockPersistence.dismissFeature(any, "a"));
+    });
+
     testWidgets("when features are completed then no feature will be activated",
         (WidgetTester tester) async {
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();

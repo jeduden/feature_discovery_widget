@@ -172,7 +172,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           .stop(); // we don't want any completion notifications. anymore
       switch (_state) {
         case FeatureOverlayState.opening:
-          assert(to == null);
+          assert(to == null || to == FeatureOverlayState.dismissing);
           if (_activeFeature != widget.featureId) {
             _setOverlayState(FeatureOverlayState.dismissing);
             _animationController.duration = config.dismissDuration;
