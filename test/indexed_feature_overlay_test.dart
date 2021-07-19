@@ -75,7 +75,7 @@ void main() {
       // dismiss
       await tester.tap(find.byIcon(Icons.access_alarm));
       await tester.pump(Duration(milliseconds: 1100));
-      // confirm
+      // confirm we got a dismiss event
       expect(
           events,
           orderedEquals([
@@ -96,7 +96,9 @@ void main() {
           ]));
       await tester.pumpAndSettle(Duration(milliseconds: 2100));
 
-      // overlay is gone after tapping
+      // to check the overlay is gone from the tree, 
+      // we check if the icon of the overlay child
+      // cannot be found anymore in the tree.
       expect(tester.widget(find.byIcon(Icons.ac_unit)), equals(null));
 
       completeFeaturesStreamController.add(<String>{});
