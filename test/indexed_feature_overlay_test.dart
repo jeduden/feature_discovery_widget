@@ -5,24 +5,16 @@ import 'package:feature_discovery_widget/src/feature_overlay_config_provider.dar
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'mocks.dart';
 import 'widgets.dart';
 
 void main() {
   group("IndexedFeatureOverlay", () {
-    late MockPersistence mockPersistence;
     late StreamController<Set<String>> completeFeaturesStreamController;
     StreamSubscription<FeatureOverlayEvent>? eventSubscription;
 
     setUp(() {
-      mockPersistence = MockPersistence();
       completeFeaturesStreamController =
           StreamController<Set<String>>.broadcast();
-      when(mockPersistence.completedFeaturesStream)
-          .thenAnswer((_) => completeFeaturesStreamController.stream);
-      when(mockPersistence.setTourFeatureIds(any))
-          .thenAnswer((_) => Future.value());
     });
     tearDown(() {
       completeFeaturesStreamController.close();
@@ -41,10 +33,7 @@ void main() {
               body: FeatureOverlayConfigProvider(
                   key: providerKey,
                   enablePulsingAnimation: false,
-                  persistenceBuilder: () => mockPersistence,
-                  child: FeatureTour(
-                      featureIds: ["myFeature"],
-                      child: IndexedFeatureOverlay(
+                  child: IndexedFeatureOverlay(
                           featureOverlays: {
                             FeatureOverlay(
                                 featureId: "myFeature",
@@ -60,7 +49,7 @@ void main() {
                                   onPressed: () => null,
                                   icon: Icon(Icons.access_alarm)),
                             ],
-                          )))))));
+                          ))))));
      final List<FeatureOverlayEvent> events = List.empty(growable: true);
       providerKey.currentState!.events.listen((event) {
         events.add(event);

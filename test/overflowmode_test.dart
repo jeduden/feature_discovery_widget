@@ -6,14 +6,11 @@ import 'package:feature_discovery_widget/src/indexed_feature_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'mocks.dart';
 import 'widgets.dart';
 
 void main() {
   final List<FeatureOverlayEvent> events = [];
   final eventController = StreamController<FeatureOverlayEvent>();
-  late MockPersistence mockPersistence;
 
   setUpAll(() {
     eventController.stream.listen((event) => events.add(event));
@@ -23,7 +20,6 @@ void main() {
   });
   setUp(() {
     events.clear();
-    mockPersistence = MockPersistence();
   });
   group('Content placement snapshot test', () {
     const screenSize = Size(3e2, 4e3);
@@ -55,7 +51,6 @@ void main() {
                   layerLink: LayerLink(),
                   activeFeatureId: featureId,
                   eventsSink: eventController.sink,
-                  featureTourPersistence: mockPersistence,
                   openDuration: Duration(milliseconds: 10),
                   child: IndexedFeatureOverlay(
                       featureOverlays: {

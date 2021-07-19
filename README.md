@@ -99,7 +99,7 @@ class FeatureTourPersistenceWithSharedPreferences implements FeatureTourPersiste
 This package is works for some configurations and is not (yet?) published on pub.dev.
 
 ### To-do
-
+   
 1. Support other feature discovery designs that work non-icon widgets?
 2. Add example with a wider range of configurations.
 3. Remove debug statements

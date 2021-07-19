@@ -4,54 +4,50 @@ import 'package:flutter/material.dart';
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 void main() async {
   // https://github.com/flutter/flutter/issues/80956#issuecomment-828833524
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
-const IncrementFeatureId = "Increment";
-const CounterFeatureId = "Counter";
-const HomePortal = "HomePortal";
-const providerKey = GlobalObjectKey("provider");
 
+class CustomFeatureTour extends FeatureTour  {
+  CustomFeatureTour(
+      {Key? key,
+      required Widget child,
+      required List<String> featureIds,
+      })
+      : super(key: key, child: child, featureIds: featureIds);
 
-// move instanciation to ConfigProvider
+  @override
+  State<StatefulWidget> createState() {
+    return CustomerFeatureTourState();
+  }
+}
 
-class FeatureTourPersistenceWithSharedPreferences
-    implements FeatureTourPersistence {
+class CustomerFeatureTourState  extends FeatureTourState {
   static const keyId = "completedFeatures";
 
-  final BuildContext context;
-  final _streamController = StreamController<Set<String>>();
-  Set<String>? _lastCompletedSet;
-  List<String>? _tourFeatureIds;
-
-  FeatureTourPersistenceWithSharedPreferences(this.context);
-
   @override
-  Stream<Set<String>> get completedFeaturesStream => _streamController.stream;
-
-  @override
-  Future<void> setTourFeatureIds(List<String> tourFeatureIds) async {
-    _tourFeatureIds = tourFeatureIds;
-  }
-
-  void _storeSet(Set<String>? featureIds) async {
-    print("Storing $featureIds");
+  Future<Set<String>> loadCompletedFeatures() async {
+    print("Persist: Loading");
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(keyId, featureIds?.toList()??[]);
-    _streamController.add(featureIds??Set.identity()); 
+    final set =  prefs.getStringList(keyId)?.toSet() ?? {};
+    print("Persist: Loaded: $set");
+    return set;
   }
 
   @override
-  Future<void> completeFeature(BuildContext context, String featureId) async {
-    final newCompletedSet = Set<String>.from(_lastCompletedSet??Set.identity())..add(featureId);
-    _storeSet(newCompletedSet);
+  Future<void> storeCompletedFeatures(Set<String>? completedFeatureIds) async {
+    print("Persist: Storing $completedFeatureIds");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(keyId, completedFeatureIds?.toList()??[]);
   }
 
   @override
-  Future<void> dismissFeature(BuildContext context, String featureId) async {
+  Future<void> dismissFeature(String featureId) async {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       showDialog(
           context: context,
@@ -61,13 +57,12 @@ class FeatureTourPersistenceWithSharedPreferences
               actions: [
                 TextButton(
                     onPressed: () async {
-                      _storeSet(_tourFeatureIds?.toSet());
+                      await abortTour();
                       Navigator.of(context).pop();
                     },
                     child: Text('Yes')),
                 TextButton(
                     onPressed: () {
-                      _storeSet(_lastCompletedSet?.toSet());
                       Navigator.of(context).pop();
                       // dont do anything to show the overlay again
                     },
@@ -77,12 +72,12 @@ class FeatureTourPersistenceWithSharedPreferences
           });
     });
   }
-
-  Future<void> clearCompletions() async {
-    _storeSet(Set<String>.identity());
-  }
 }
 
+const IncrementFeatureId = "Increment";
+const CounterFeatureId = "Counter";
+const HomePortal = "HomePortal";
+const providerKey = GlobalObjectKey("provider");
 class MyApp extends StatelessWidget {
   final bool disableAnimations;
 
@@ -93,13 +88,12 @@ class MyApp extends StatelessWidget {
     return FeatureOverlayConfigProvider(
         key: providerKey,
         enablePulsingAnimation: !disableAnimations,
-        persistenceBuilder: () => FeatureTourPersistenceWithSharedPreferences(context),
         child: MaterialApp(
           title: 'Simple Feature Discovery',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: Builder(builder:(context) => FeatureTour(
+          home: Builder(builder:(context) => CustomFeatureTour(
             // we need a context that has the material app in the tree
             // hence we cant take directly the context from MyApp.build
             // we don't need to store persistent in a state
@@ -124,25 +118,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
-    showDialog(
-          context: context,
-          builder: (BuildContext ctx) {
-            return AlertDialog(
-              title: Text('Abort Tutorial?'),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      
-                    },
-                    child: Text('Yes')),
-                TextButton(
-                    onPressed: () {
-                      // dont do anything to show the overlay again
-                    },
-                    child: Text('No, show me the info'))
-              ],
-            );
-          });
     setState(() {
       _counter++;
     });
@@ -190,8 +165,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: Theme.of(context).textTheme.headline4,
                           )),
                       TextButton(onPressed: () async {
-                        final persistence = FeatureOverlayConfigProvider.featureTourPersistenceOf<FeatureTourPersistenceWithSharedPreferences>(context);
-                        await persistence.clearCompletions();
+                        final featureTourState = FeatureTour.of(context);
+                        await featureTourState.resetTour();
                       }, child: Text("Restart tutorial"))
                     ],
                   ),

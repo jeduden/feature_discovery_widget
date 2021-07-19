@@ -88,13 +88,14 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
       else {
         // need to this test.....
         
-        //currentFeatureOverlay = null;
-        //currentOverlayEntry = null;
-        print("not yet fixed.");
+        currentFeatureOverlay = null;
+        currentOverlayEntry = null;
+        //print("not yet fixed.");
       }
     }
     else {
       print("IndexFeatureOverlayState.didChangeDependencies: activeFeatureOverlayFromThis $activeFeatureOverlayFromThis did not change.");
+     
     }
     super.didChangeDependencies();
   }

@@ -32,10 +32,6 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
 
-  /// Persistence factory. This must not depend on a BuildContext
-  /// as it is called during [State.initState]
-  final FeatureTourPersistence Function() persistenceBuilder;
-
   const FeatureOverlayConfigProvider(
       {Key? key,
       required this.child,
@@ -44,8 +40,7 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
       this.pulseDuration = const Duration(milliseconds: 1000),
       this.completeDuration = const Duration(milliseconds: 400),
       this.dismissDuration = const Duration(milliseconds: 250), 
-      required this.persistenceBuilder})
-      : super(key: key);
+      }): super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -62,12 +57,6 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   /// Returns [Stream<FeatureOverlayEvent>] to subscribe to all [FeatureOverlayEvent] events.
   static Stream<FeatureOverlayEvent> eventStreamOf(BuildContext context) {
     return FeatureOverlayConfigProviderState.of(context).events;
-  }
-
-  /// Returns [FeatureTourPersistence] 
-    
-  static T featureTourPersistenceOf<T extends FeatureTourPersistence>(BuildContext context) {
-    return FeatureOverlayConfigProviderState.of(context).featureTourPersistence as T;
   }
 }
 
@@ -90,13 +79,10 @@ class FeatureOverlayConfigProviderState
 
   Stream<FeatureOverlayEvent> get events => eventsController.stream;
 
-  late FeatureTourPersistence featureTourPersistence;
-
   @override
   void initState() {
     layerLink = LayerLink();
     eventsController = StreamController.broadcast();
-    featureTourPersistence = widget.persistenceBuilder();
     print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();
   }
@@ -122,7 +108,6 @@ class FeatureOverlayConfigProviderState
       layerLink: layerLink,
       child: widget.child,
       eventsSink: eventsController.sink,
-      featureTourPersistence: featureTourPersistence,
       activeFeatureId: activeFeatureId,
       openDuration: widget.openDuration,
       completeDuration: widget.completeDuration,

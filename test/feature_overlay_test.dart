@@ -4,14 +4,12 @@ import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'mocks.dart';
 import 'widgets.dart';
 
 void main() {
   group("FeatureOverlay", () {
     final List<FeatureOverlayEvent> events = [];
     final eventController = StreamController<FeatureOverlayEvent>();
-    late MockPersistence mockPersistence;
 
     setUpAll(() {
       eventController.stream.listen((event) => events.add(event));
@@ -21,7 +19,6 @@ void main() {
     });
     setUp(() {
       events.clear();
-      mockPersistence = MockPersistence();
     });
 
     testWidgets("Doesnt animate when enablePulsingAnimation is false",
@@ -36,7 +33,6 @@ void main() {
               layerLink: LayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
-              featureTourPersistence: mockPersistence,
               child: FeatureOverlay(
                   featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
 
@@ -57,7 +53,6 @@ void main() {
               layerLink: LayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
-              featureTourPersistence: mockPersistence,
               openDuration: Duration(milliseconds: 2000),
               child: FeatureOverlay(
                   featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
@@ -88,7 +83,6 @@ void main() {
               enablePulsingAnimation: false,
               layerLink: LayerLink(),
               activeFeatureId: null,
-              featureTourPersistence: mockPersistence,
               eventsSink: eventController.sink,
               openDuration: Duration(milliseconds: 2000),
               dismissDuration: Duration(milliseconds: 2000),
@@ -129,7 +123,6 @@ void main() {
               layerLink: LayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
-              featureTourPersistence: mockPersistence,
               child: FeatureOverlay(
                   featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
       await tester.pumpAndSettle();

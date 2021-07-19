@@ -32,15 +32,12 @@ class FeatureOverlayConfig extends InheritedWidget {
 
   final LayerLink layerLink;
 
-  final FeatureTourPersistence featureTourPersistence;
-
   FeatureOverlayConfig({
     Key? key,
     required Widget child,
     this.enablePulsingAnimation: true,
     required this.layerLink,
     required this.eventsSink,
-    required this.featureTourPersistence,
     this.activeFeatureId,
     this.openDuration: const Duration(milliseconds: 500),
     this.pulseDuration: const Duration(milliseconds: 1000),
@@ -57,7 +54,6 @@ class FeatureOverlayConfig extends InheritedWidget {
         layerLink != oldWidget.layerLink ||
         eventsSink != oldWidget.eventsSink ||
         activeFeatureId != oldWidget.activeFeatureId ||
-        featureTourPersistence != oldWidget.featureTourPersistence ||
         openDuration != oldWidget.openDuration ||
         pulseDuration != oldWidget.pulseDuration ||
         completeDuration != oldWidget.completeDuration ||

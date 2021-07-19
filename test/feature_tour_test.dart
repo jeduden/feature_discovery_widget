@@ -1,16 +1,14 @@
 import 'dart:async';
 
+import 'package:feature_discovery_widget/src/feature_tour.dart';
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'mocks.dart';
-import 'widgets.dart';
 
 void main() {
-  late MockPersistence mockPersistence;
+
   late StreamController<Set<String>> completeFeaturesStreamController;
 
   setUpAll(() {
@@ -20,9 +18,6 @@ void main() {
   setUp(() {
     completeFeaturesStreamController =
         StreamController<Set<String>>.broadcast();
-    mockPersistence = MockPersistence();
-    when(mockPersistence.completedFeaturesStream)
-        .thenAnswer((_) => completeFeaturesStreamController.stream);
   });
   tearDown(() {
     completeFeaturesStreamController.close();
@@ -32,20 +27,17 @@ void main() {
     testWidgets(
         "completed first feature before initialization and moves to first not completed feature",
         (WidgetTester tester) async {
-      
-      when(mockPersistence.setTourFeatureIds(any))
-          .thenAnswer((_) async => Future.value());
+    
       completeFeaturesStreamController.onListen = () => completeFeaturesStreamController.add(<String>{"a"});  
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
       await tester.pumpWidget(Builder(builder: (context) {
         return FeatureOverlayConfigProvider(
             key: providerKey,
             enablePulsingAnimation: false,
-            persistenceBuilder: () => mockPersistence,
             child: FeatureTour(featureIds: ["a", "b"], child: Container()));
       }));
       await tester.pumpAndSettle();
-      verify(mockPersistence.setTourFeatureIds(["a", "b"].toList()));
+      
       expect(providerKey.currentState!.activeFeatureId, equals("b"));
     });
 
