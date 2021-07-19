@@ -90,6 +90,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
         
         //currentFeatureOverlay = null;
         //currentOverlayEntry = null;
+        print("not yet fixed.");
       }
     }
     else {
