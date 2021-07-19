@@ -194,7 +194,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           _setOverlayState(FeatureOverlayState.closed);
           break;
         case FeatureOverlayState.closed:
-          assert(to == null);
+          assert(to == null || to == FeatureOverlayState.closed);
           if (_activeFeature == widget.featureId) {
             _setOverlayState(FeatureOverlayState.opening);
             _animationController.duration = config.openDuration;

@@ -65,11 +65,20 @@ class FeatureTourState extends State<FeatureTour> {
     _overlayEventsSubscription?.cancel();
     _overlayEventsSubscription = events.listen((event) async {
       print("tour listen: $event");
-      if (event.previousState == FeatureOverlayState.opened || event.previousState == FeatureOverlayState.opening) {
+      /*if (event.previousState == FeatureOverlayState.opened || event.previousState == FeatureOverlayState.opening) {
         if (event.state == FeatureOverlayState.completing) {
           print("tour listen: peristence => completeFeature");
           await _completeFeature(event.featureId);
         } else if(event.state == FeatureOverlayState.dismissing) {
+          print("tour listen: peristence => dismissFeature");
+          await _dismissFeature(event.featureId);
+        }
+      }*/
+      if (event.state == FeatureOverlayState.closed) {
+        if (event.previousState == FeatureOverlayState.completing) {
+          print("tour listen: peristence => completeFeature");
+          await _completeFeature(event.featureId);
+        } else if(event.previousState == FeatureOverlayState.dismissing) {
           print("tour listen: peristence => dismissFeature");
           await _dismissFeature(event.featureId);
         }

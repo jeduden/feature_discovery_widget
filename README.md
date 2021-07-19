@@ -100,6 +100,8 @@ This package is works for some configurations and is not (yet?) published on pub
 
 ### To-do
    
+0. redo feature-tour tests.
+1. continue creating tests for dismiss -> 
 1. Support other feature discovery designs that work non-icon widgets?
 2. Add example with a wider range of configurations.
 3. Remove debug statements
