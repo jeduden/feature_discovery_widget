@@ -9,11 +9,23 @@ class FeatureTour extends StatefulWidget {
 
   /// List all feature ids in order.
   final List<String> featureIds;
-  
+
+  /// Called after feature has been dismissed
+  final void Function(FeatureTourState state, String featureId)? onDismissFeature;
+
+  /// Loads the feature ids from (external) storage and returns them.
+  final Future<Set<String>> Function()? loadCompletedFeatures;
+
+  /// Stores the features in (external) storage 
+  final Future<void> Function(Set<String>?)? storeCompletedFeatures;
+
   FeatureTour(
       {Key? key,
       required this.child,
       required this.featureIds,
+      this.onDismissFeature,
+      this.loadCompletedFeatures,
+      this.storeCompletedFeatures,
       })
       : super(key: key);
 
@@ -131,42 +143,29 @@ class FeatureTourState extends State<FeatureTour> {
   @protected
   Future<void> _dismissFeature(String featureId) async {
     _setActive(null); 
-    await dismissFeature(featureId);
+    widget.onDismissFeature?.call(this,featureId);
   }
 
-  /// Handles dismiss. By default doesn't do anything
-  @protected
-  Future<void> dismissFeature(String featureId) async {
-  }
 
   /// Loads the features from (external) storage into [lastCompletedFeatures]
   /// by calling [loadCompletedFeatures].
   /// By default resets [lastCompletedFeatures] to the empty set.
   Future<void> _loadCompletedFeatures() async {
     print("load $_lastCompletedFeatures");
-    _updateCompletedFeatures(await loadCompletedFeatures(), persist:false);
+    _updateCompletedFeatures(await widget.loadCompletedFeatures?.call(), persist:false);
   }
 
-  /// Loads the feature ids from (external) storage and returns them.
-  /// By default returns the empty set.
-  @protected
-  Future<Set<String>> loadCompletedFeatures() async {
-    return {};
-  }
+
   
   /// Stores the completed features in (external) _lastCompletedFeatures
   /// storage using [storeCompletedFeatures] if persist is true (default)
   Future<void> _updateCompletedFeatures(Set<String>? featureIds, {bool persist = true}) async {
-    _lastCompletedFeatures = featureIds;
+    _lastCompletedFeatures = featureIds ?? {};
     _updateActive();
-    await storeCompletedFeatures(featureIds);
+    print("storing $_lastCompletedFeatures");
+    await widget.storeCompletedFeatures?.call(_lastCompletedFeatures);
   }
 
-  /// Stores the features in (external) storage [lastCompletedFeatures]. 
-  /// By default doesnt do anything
-  @protected
-  Future<void> storeCompletedFeatures(Set<String>? featureIds) async {
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -4,80 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 void main() async {
   // https://github.com/flutter/flutter/issues/80956#issuecomment-828833524
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
-
-class CustomFeatureTour extends FeatureTour  {
-  CustomFeatureTour(
-      {Key? key,
-      required Widget child,
-      required List<String> featureIds,
-      })
-      : super(key: key, child: child, featureIds: featureIds);
-
-  @override
-  State<StatefulWidget> createState() {
-    return CustomerFeatureTourState();
-  }
-}
-
-class CustomerFeatureTourState  extends FeatureTourState {
-  static const keyId = "completedFeatures";
-
-  @override
-  Future<Set<String>> loadCompletedFeatures() async {
-    print("Persist: Loading");
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final set =  prefs.getStringList(keyId)?.toSet() ?? {};
-    print("Persist: Loaded: $set");
-    return set;
-  }
-
-  @override
-  Future<void> storeCompletedFeatures(Set<String>? completedFeatureIds) async {
-    print("Persist: Storing $completedFeatureIds");
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(keyId, completedFeatureIds?.toList()??[]);
-  }
-
-  @override
-  Future<void> dismissFeature(String featureId) async {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Abort Tutorial?'),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      await abortTour();
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Yes')),
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      // dont do anything to show the overlay again
-                    },
-                    child: Text('No, show me the info'))
-              ],
-            );
-          });
-    });
-  }
-}
+const keyId = "completedFeatures";
 
 const IncrementFeatureId = "Increment";
 const CounterFeatureId = "Counter";
 const HomePortal = "HomePortal";
 const providerKey = GlobalObjectKey("provider");
+
 class MyApp extends StatelessWidget {
   final bool disableAnimations;
 
@@ -93,15 +32,57 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: Builder(builder:(context) => CustomFeatureTour(
-            // we need a context that has the material app in the tree
-            // hence we cant take directly the context from MyApp.build
-            // we don't need to store persistent in a state
-            // since all stateful information is passed into the 
-            // methods.
-            child: MyHomePage(title: 'Simple Feature Discovery Example'),
-            featureIds: [IncrementFeatureId, CounterFeatureId],
-          )),
+          home: Builder(
+              builder: (context) => FeatureTour(
+                    loadCompletedFeatures: () async {
+                      print("Persist: Loading");
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      final set = prefs.getStringList(keyId)?.toSet() ?? {};
+                      print("Persist: Loaded: $set");
+                      return set;
+                    },
+                    storeCompletedFeatures: (completedFeatureIds) async {
+                      print("Persist: Storing $completedFeatureIds");
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setStringList(
+                          keyId, completedFeatureIds?.toList() ?? []);
+                    },
+                    onDismissFeature: (state, featureId) {
+                      WidgetsBinding.instance!.addPostFrameCallback((_) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Abort Tutorial?'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        await state.abortTour();
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Yes')),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        // dont do anything to show the overlay again
+                                      },
+                                      child: Text('No, show me the info'))
+                                ],
+                              );
+                            });
+                      });
+                    },
+                    // we need a context that has the material app in the tree
+                    // hence we cant take directly the context from MyApp.build
+                    // we don't need to store persistent in a state
+                    // since all stateful information is passed into the
+                    // methods.
+                    child:
+                        MyHomePage(title: 'Simple Feature Discovery Example'),
+                    featureIds: [IncrementFeatureId, CounterFeatureId],
+                  )),
         ));
   }
 }
@@ -164,10 +145,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             '$_counter',
                             style: Theme.of(context).textTheme.headline4,
                           )),
-                      TextButton(onPressed: () async {
-                        final featureTourState = FeatureTour.of(context);
-                        await featureTourState.resetTour();
-                      }, child: Text("Restart tutorial"))
+                      TextButton(
+                          onPressed: () async {
+                            final featureTourState = FeatureTour.of(context);
+                            await featureTourState.resetTour();
+                          },
+                          child: Text("Restart tutorial"))
                     ],
                   ),
                 )),
