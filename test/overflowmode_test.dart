@@ -6,6 +6,7 @@ import 'package:feature_discovery_widget/src/indexed_feature_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'widgets.dart';
 
 void main() {
   final List<FeatureOverlayEvent> events = [];
@@ -44,10 +45,7 @@ void main() {
           description: SizedBox(width: 100,height: descriptionHeight,),
           tapTarget: Icon(Icons.ac_unit_sharp,size:tapTargetIconHeight),
         );
-        await tester.pumpWidget(MediaQuery(
-            data: new MediaQueryData(size: screenSize),
-            child: Directionality(
-                textDirection: TextDirection.ltr,
+        await tester.pumpWidget(MinimalTestWrapper(screenSize: screenSize,
                 child: FeatureOverlayConfig(
                   enablePulsingAnimation: false,
                   layerLink: LayerLink(),
@@ -67,7 +65,7 @@ void main() {
                                 featureId: featureId,
                                 child: Icon(Icons.ac_unit)),
                           ))),
-                ))));
+                )));
         await tester.pumpAndSettle(Duration(milliseconds: 11));
 
         final actual = tester.getRect(find.byType(Content));

@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  // https://github.com/flutter/flutter/issues/80956#issuecomment-828833524
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
+
+const keyId = "completedFeatures";
 
 const IncrementFeatureId = "Increment";
 const CounterFeatureId = "Counter";
@@ -25,10 +32,57 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: FeatureTour(
-            child: MyHomePage(title: 'Simple Feature Discovery Example'),
-            featureIds: [IncrementFeatureId, CounterFeatureId],
-          ),
+          home: Builder(
+              builder: (context) => FeatureTour(
+                    loadCompletedFeatures: () async {
+                      print("Persist: Loading");
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      final set = prefs.getStringList(keyId)?.toSet() ?? {};
+                      print("Persist: Loaded: $set");
+                      return set;
+                    },
+                    storeCompletedFeatures: (completedFeatureIds) async {
+                      print("Persist: Storing $completedFeatureIds");
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setStringList(
+                          keyId, completedFeatureIds?.toList() ?? []);
+                    },
+                    onDismissFeature: (state, featureId) {
+                      WidgetsBinding.instance!.addPostFrameCallback((_) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Abort Tutorial?'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        await state.abortTour();
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Yes')),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        // dont do anything to show the overlay again
+                                      },
+                                      child: Text('No, continue with tutorial next time'))
+                                ],
+                              );
+                            });
+                      });
+                    },
+                    // we need a context that has the material app in the tree
+                    // hence we cant take directly the context from MyApp.build
+                    // we don't need to store persistent in a state
+                    // since all stateful information is passed into the
+                    // methods.
+                    child:
+                        MyHomePage(title: 'Simple Feature Discovery Example'),
+                    featureIds: [IncrementFeatureId, CounterFeatureId],
+                  )),
         ));
   }
 }
@@ -57,7 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
           FeatureOverlay(
               featureId: IncrementFeatureId,
               title: Text("Increment counter! With a very long title !"),
-              description: Text("Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
+              description: Text(
+                  "Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
               contentLocation: ContentLocation.above,
               overflowMode: OverflowMode.extendBackground,
               tapTarget: Icon(Icons.add)),
@@ -70,8 +125,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureOverlays: {
                   FeatureOverlay(
                       featureId: CounterFeatureId,
-                      title: Text("This is the counter. Longer Line ! Longer and Longer"),
-                      description: Text("It increases indefinetly.\nIt starts at 0."),
+                      title: Text(
+                          "This is the counter. Longer Line ! Longer and Longer"),
+                      description:
+                          Text("It increases indefinetly.\nIt starts at 0."),
                       contentLocation: ContentLocation.below,
                       tapTarget: Icon(Icons.access_alarm))
                 },
@@ -88,6 +145,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             '$_counter',
                             style: Theme.of(context).textTheme.headline4,
                           )),
+                      TextButton(
+                          onPressed: () async {
+                            final featureTourState = FeatureTour.of(context);
+                            await featureTourState.resetTour();
+                          },
+                          child: Text("Restart tutorial"))
                     ],
                   ),
                 )),

@@ -27,15 +27,14 @@ void main() {
               as TestWidgetsFlutterBinding)
           .setSurfaceSize(const Size(3e2, 4e3));
 
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfig(
-            enablePulsingAnimation: false,
-            layerLink: LayerLink(),
-            activeFeatureId: "myFeature",
-            eventsSink: eventController.sink,
-            child: FeatureOverlay(
-                featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)));
-      })));
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfig(
+              enablePulsingAnimation: false,
+              layerLink: LayerLink(),
+              activeFeatureId: "myFeature",
+              eventsSink: eventController.sink,
+              child: FeatureOverlay(
+                  featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
 
       await tester.pumpAndSettle(Duration(milliseconds: 1100));
     });
@@ -43,19 +42,20 @@ void main() {
     testWidgets(
         "depending on active id in config it transitions: closed -> opening -> opened -> dismissing -> closed",
         (WidgetTester tester) async {
+      const screenSize = const Size(3e2, 4e3);
       await (TestWidgetsFlutterBinding.ensureInitialized()
               as TestWidgetsFlutterBinding)
-          .setSurfaceSize(const Size(3e2, 4e3));
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfig(
-            enablePulsingAnimation: false,
-            layerLink: LayerLink(),
-            activeFeatureId: "myFeature",
-            eventsSink: eventController.sink,
-            openDuration: Duration(milliseconds: 2000),
-            child: FeatureOverlay(
-                featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)));
-      })));
+          .setSurfaceSize(screenSize);
+      await tester.pumpWidget(MinimalTestWrapper(
+          screenSize: screenSize,
+          child: FeatureOverlayConfig(
+              enablePulsingAnimation: false,
+              layerLink: LayerLink(),
+              activeFeatureId: "myFeature",
+              eventsSink: eventController.sink,
+              openDuration: Duration(milliseconds: 2000),
+              child: FeatureOverlay(
+                  featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
 
       await tester.pump(Duration(milliseconds: 1100));
       expect(
@@ -77,18 +77,18 @@ void main() {
                 featureId: "myFeature")
           ]));
       events.clear();
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfig(
-            enablePulsingAnimation: false,
-            layerLink: LayerLink(),
-            activeFeatureId: null,
-            eventsSink: eventController.sink,
-            openDuration: Duration(milliseconds: 2000),
-            dismissDuration: Duration(milliseconds: 2000),
-            completeDuration: Duration(milliseconds: 10),
-            child: FeatureOverlay(
-                featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)));
-      })));
+      await tester.pumpWidget(MinimalTestWrapper(
+          screenSize: screenSize,
+          child: FeatureOverlayConfig(
+              enablePulsingAnimation: false,
+              layerLink: LayerLink(),
+              activeFeatureId: null,
+              eventsSink: eventController.sink,
+              openDuration: Duration(milliseconds: 2000),
+              dismissDuration: Duration(milliseconds: 2000),
+              completeDuration: Duration(milliseconds: 10),
+              child: FeatureOverlay(
+                  featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
       await tester.pump(Duration(milliseconds: 1000));
       expect(
           events,
@@ -111,18 +111,20 @@ void main() {
     });
     testWidgets("when hitting tap target: sink is notified.",
         (WidgetTester tester) async {
+      const screenSize = const Size(3e2, 4e3);
       await (TestWidgetsFlutterBinding.ensureInitialized()
               as TestWidgetsFlutterBinding)
-          .setSurfaceSize(const Size(3e2, 4e3));
-      await tester.pumpWidget(TestWrapper(child: Builder(builder: (context) {
-        return FeatureOverlayConfig(
-            enablePulsingAnimation: false,
-            layerLink: LayerLink(),
-            activeFeatureId: "myFeature",
-            eventsSink: eventController.sink,
-            child: FeatureOverlay(
-                featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)));
-      })));
+          .setSurfaceSize(screenSize);
+
+      await tester.pumpWidget(MinimalTestWrapper(
+          screenSize: screenSize,
+          child: FeatureOverlayConfig(
+              enablePulsingAnimation: false,
+              layerLink: LayerLink(),
+              activeFeatureId: "myFeature",
+              eventsSink: eventController.sink,
+              child: FeatureOverlay(
+                  featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
       await tester.pumpAndSettle();
       events.clear();
       await tester.tap(find.byIcon(Icons.ac_unit));

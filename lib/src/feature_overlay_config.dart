@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'feature_overlay_event.dart';
 
-@visibleForTesting
 /// Provides configuration to FeatureOverlays
 /// Use this to force behaviour in test scenarios
 class FeatureOverlayConfig extends InheritedWidget {

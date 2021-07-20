@@ -39,8 +39,8 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
       this.openDuration = const Duration(milliseconds: 250),
       this.pulseDuration = const Duration(milliseconds: 1000),
       this.completeDuration = const Duration(milliseconds: 400),
-      this.dismissDuration = const Duration(milliseconds: 250)})
-      : super(key: key);
+      this.dismissDuration = const Duration(milliseconds: 250), 
+      }): super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -69,24 +69,27 @@ abstract class FeatureOverlayConfigChangeNotifier {
 class FeatureOverlayConfigProviderState
     extends State<FeatureOverlayConfigProvider>
     implements FeatureOverlayConfigChangeNotifier {
-  String? _activeFeatureId;
+
+  @visibleForTesting
+  String? activeFeatureId;
   late LayerLink layerLink;
 
-  late StreamController<FeatureOverlayEvent> _eventsController;
+  @visibleForTesting
+  late StreamController<FeatureOverlayEvent> eventsController;
 
-  Stream<FeatureOverlayEvent> get events => _eventsController.stream;
+  Stream<FeatureOverlayEvent> get events => eventsController.stream;
 
   @override
   void initState() {
     layerLink = LayerLink();
-    _eventsController = StreamController.broadcast();
+    eventsController = StreamController.broadcast();
     print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();
   }
 
   @override
   void dispose() {
-    _eventsController.close();
+    eventsController.close();
     super.dispose();
   }
 
@@ -94,8 +97,8 @@ class FeatureOverlayConfigProviderState
   void notifyActiveFeature(String? featureId) {
     setState(() {
       print(
-          "FeatureOverlayConfigProviderState.notifyActiveFeature.setState $this _activeFeatureId:$_activeFeatureId");
-      _activeFeatureId = featureId;
+          "FeatureOverlayConfigProviderState.notifyActiveFeature.setState $this activeFeatureId:$activeFeatureId");
+      activeFeatureId = featureId;
     });
   }
 
@@ -104,15 +107,15 @@ class FeatureOverlayConfigProviderState
     final config = FeatureOverlayConfig(
       layerLink: layerLink,
       child: widget.child,
-      eventsSink: _eventsController.sink,
-      activeFeatureId: _activeFeatureId,
+      eventsSink: eventsController.sink,
+      activeFeatureId: activeFeatureId,
       openDuration: widget.openDuration,
       completeDuration: widget.completeDuration,
       dismissDuration: widget.dismissDuration,
       pulseDuration: widget.pulseDuration,
     );
     print(
-        "FeatureOverlayConfigProviderState.build $this => $config _activeFeatureId:$_activeFeatureId");
+        "FeatureOverlayConfigProviderState.build $this => $config activeFeatureId:$activeFeatureId");
     return config;
   }
 
@@ -127,6 +130,6 @@ class FeatureOverlayConfigProviderState
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty("_activeFeatureId", _activeFeatureId));
+    properties.add(StringProperty("activeFeatureId", activeFeatureId));
   }
 }

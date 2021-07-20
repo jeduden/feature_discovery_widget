@@ -3,7 +3,7 @@
 This package is based on the [feature_discovery package](https://pub.dev/packages/feature_discovery/), however the major changes have been done:
 
 - This package does not have any dependency except Flutter.
-- Statemanagement needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, but is not persistent.
+- Persistence needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, has callbacks for storing and loading the completion state.
 - The application decides where in the widget tree feature overlay's can appear.
 - Includes changes/fixes regarding layout, animation and painting.
 
@@ -62,96 +62,61 @@ Wrap the target that a feature overlay should describe with `FeatureOverlayTarge
 
 Please check the docs for further appearance and configuration options.
 
-### Listening for events and change the active feature
+### Feature Tour Persistence Implementation
 
-#### Plain Flutter
-
-Example implementation, that works without an statemanagement package.
+Example implementation using the [shared_preferences](https://pub.dev/packages/shared_preferences) package.
 
 ```dart
-class FeatureTourWidget extends StatefulWidget {
-  final Widget child;
-  final List<String> featureIds;
-
-  FeatureTourWidget({
-    Key? key,
-    required this.child,
-    required this.featureIds,
-  }) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() {
-    return FeatureTourState();
-  }
+FeatureTour(
+  loadCompletedFeatures: () async {
+    SharedPreferences prefs =
+        await SharedPreferences.getInstance();
+    return prefs.getStringList(keyId)?.toSet() ?? {};
+  },
+  storeCompletedFeatures: (completedFeatureIds) async {
+    SharedPreferences prefs =
+        await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        keyId, completedFeatureIds?.toList() ?? []);
+  },
+  [...]
 }
+```
 
-class FeatureTourState extends State<FeatureTourWidget> {
-  Iterator<String>? featuresIterator;
-  StreamSubscription<FeatureOverlayEvent>? _subscription;
+### Reset/restart tour
 
-  @override
-  void didUpdateWidget(covariant FeatureTourWidget oldWidget) {
-    if (!listEquals(oldWidget.featureIds, widget.featureIds)) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        featuresIterator = null;
-        _ensureActiveInitialized();
-      });
-    }
-    super.didUpdateWidget(oldWidget);
-  }
+```dart
+TextButton(
+  onPressed: () async {
+    final featureTourState = FeatureTour.of(context);
+    await featureTourState.resetTour();
+  },
+  child: Text("Restart tutorial"))
+```
 
-  @override
-  void didChangeDependencies() {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      _ensureActiveInitialized();
+### Show dialog in onDismissFeature
+
+```dart
+FeatureTour(
+  onDismissFeature: (state, featureId) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      showDialog(
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Abort Tutorial?'),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      await state.abortTour();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Yes')),
+                [...]
+            );
+          });
     });
-
-    final events = FeatureOverlayConfigProvider.eventStreamOf(context);
-    
-    _subscription?.cancel();
-    _subscription = events.listen((event) {
-      if(event.state == FeatureOverlayState.closed) {
-        if(event.previousState == FeatureOverlayState.completing) { 
-          _nextActive();
-        }
-        else {
-          _setActive(null);
-        }
-      }
-    });
-    super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
-
-  void _ensureActiveInitialized() {
-    if (featuresIterator == null) {
-      featuresIterator = widget.featureIds.iterator;
-      _nextActive();
-    }
-  }
-
-  void _nextActive() {
-    if (featuresIterator!.moveNext())
-      _setActive(featuresIterator!.current);
-    else
-      _setActive(null);
-  }
-
-  void _setActive(String? active) {
-    final notifier = FeatureOverlayConfigProvider.notifierOf(context);
-    notifier.notifyActiveFeature(active);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
+  },
+  [...]
 ```
 
 ## Status
@@ -159,9 +124,9 @@ class FeatureTourState extends State<FeatureTourWidget> {
 This package is works for some configurations and is not (yet?) published on pub.dev.
 
 ### To-do
-
+   
 1. Support other feature discovery designs that work non-icon widgets?
 2. Add example with a wider range of configurations.
 3. Remove debug statements
-4. Figure out / work on better test coverage
+4. Better test coverage for FeatureOverlay painting and animations.
 5. Publish package?
