@@ -77,8 +77,6 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
       print("IndexFeatureOverlayState.didChangeDependencies: activeFeatureOverlayFromThis $activeFeatureOverlayFromThis changed");
       if (currentOverlayEntry?.mounted ?? false)
         currentOverlayEntry?.remove();
-      else
-        currentOverlayEntry = null;
       if (activeFeatureOverlayFromThis != null) {
         currentFeatureOverlay = activeFeatureOverlayFromThis;
         currentOverlayEntry =
@@ -86,11 +84,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
         tryInsertEntry(overlayKey, currentOverlayEntry!, 3);
       }
       else {
-        // need to this test.....
-        
         currentFeatureOverlay = null;
-        currentOverlayEntry = null;
-        //print("not yet fixed.");
       }
     }
     else {
