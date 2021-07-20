@@ -233,7 +233,24 @@ void main() {
       await tourKey.currentState!.abortTour();
       verify(storeMock!({"a", "b"}));
     });
+    
+    testWidgets("when loading first feature ids from storage. second becomes active",
+        (WidgetTester tester) async {
+      final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
 
+      when(loadMock!.call()).thenAnswer((_) async => {"a"});
+
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              key: providerKey,
+              enablePulsingAnimation: false,
+              child: FeatureTour(
+                storeCompletedFeatures: storeMock!,
+                loadCompletedFeatures: loadMock!,
+                featureIds: ["a", "b"], child: Container()))));
+      await tester.pumpAndSettle();
+      expect(providerKey.currentState!.activeFeatureId, equals("b"));
+    });
     testWidgets("when loading all feature ids from storage no feature is active. when calling resetTour first feature becomes active",
         (WidgetTester tester) async {
       final tourKey = GlobalKey<FeatureTourState>();
