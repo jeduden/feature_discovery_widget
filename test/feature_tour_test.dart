@@ -217,13 +217,50 @@ void main() {
       verify(storeMock!({"a"}));
     });
 
-    testWidgets("resets tour  pushes empty set to storage",
+    testWidgets("when aborting tour pushes all feature ids to storage",
         (WidgetTester tester) async {
+      final tourKey = GlobalKey<FeatureTourState>();
+
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
+              enablePulsingAnimation: false,
+              child: FeatureTour(
+                key: tourKey,
+                storeCompletedFeatures: storeMock!,
+                featureIds: ["a", "b"], child: Container()))));
+      await tester.pumpAndSettle();
+      clearInteractions(storeMock!);
+      await tourKey.currentState!.abortTour();
+      verify(storeMock!({"a", "b"}));
+    });
+
+    testWidgets("when loading all feature ids from storage no feature is active. when calling resetTour first feature becomes active",
+        (WidgetTester tester) async {
+      final tourKey = GlobalKey<FeatureTourState>();
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
+
+      when(loadMock!.call()).thenAnswer((_) async => {"a","b"});
 
       await tester.pumpWidget(MinimalTestWrapper(
           child: FeatureOverlayConfigProvider(
               key: providerKey,
+              enablePulsingAnimation: false,
+              child: FeatureTour(
+                key: tourKey,
+                storeCompletedFeatures: storeMock!,
+                loadCompletedFeatures: loadMock!,
+                featureIds: ["a", "b"], child: Container()))));
+      await tester.pumpAndSettle();
+      expect(providerKey.currentState!.activeFeatureId, equals(null));
+      clearInteractions(storeMock!);
+      await tourKey.currentState!.resetTour();
+      verify(storeMock!({}));
+    });
+
+    testWidgets("when featureIds change resets tour  pushes empty set to storage",
+        (WidgetTester tester) async {
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: FeatureOverlayConfigProvider(
               enablePulsingAnimation: false,
               child: FeatureTour(
                 storeCompletedFeatures: storeMock!,
@@ -234,7 +271,6 @@ void main() {
 
       await tester.pumpWidget(MinimalTestWrapper(
           child: FeatureOverlayConfigProvider(
-              key: providerKey,
               enablePulsingAnimation: false,
               child: FeatureTour(
                 storeCompletedFeatures: storeMock!,
