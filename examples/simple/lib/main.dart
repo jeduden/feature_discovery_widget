@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
                                         Navigator.of(context).pop();
                                         // dont do anything to show the overlay again
                                       },
-                                      child: Text('No, show me the info'))
+                                      child: Text('No, continue with tutorial next time'))
                                 ],
                               );
                             });

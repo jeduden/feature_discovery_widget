@@ -3,7 +3,7 @@
 This package is based on the [feature_discovery package](https://pub.dev/packages/feature_discovery/), however the major changes have been done:
 
 - This package does not have any dependency except Flutter.
-- Persistence needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, but requires an instance of persistence interface. 
+- Persistence needs to be implemented by the app. There is a simple FeatureTour widget, which implements a feature tour, has callbacks for storing and loading the completion state.
 - The application decides where in the widget tree feature overlay's can appear.
 - Includes changes/fixes regarding layout, animation and painting.
 
@@ -67,31 +67,56 @@ Please check the docs for further appearance and configuration options.
 Example implementation using the [shared_preferences](https://pub.dev/packages/shared_preferences) package.
 
 ```dart
-
-class FeatureTourPersistenceWithSharedPreferences implements FeatureTourPersistence {
-  static const keyId = "completedFeatures";
-    
-  @override
-  Future<Set<String>> completedFeatures() async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      return (prefs.getStringList(keyId) ?? []).toSet();
-  }
-
-  @override
-  Future<void> completeFeature(String featureId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final newCompletedSet = completedFeatures()
-                        ..add(featureId);
-    await prefs.setStringList(keyId, newCompletedSet.toList());
-  }
-
-  // Helpful to reset tutorial. but not part of the interface [FeatureTourPersistence]
-  Future<void> clearCompletions() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(keyId);
-  }
+FeatureTour(
+  loadCompletedFeatures: () async {
+    SharedPreferences prefs =
+        await SharedPreferences.getInstance();
+    return prefs.getStringList(keyId)?.toSet() ?? {};
+  },
+  storeCompletedFeatures: (completedFeatureIds) async {
+    SharedPreferences prefs =
+        await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        keyId, completedFeatureIds?.toList() ?? []);
+  },
+  [...]
 }
+```
 
+### Reset/restart tour
+
+```dart
+TextButton(
+  onPressed: () async {
+    final featureTourState = FeatureTour.of(context);
+    await featureTourState.resetTour();
+  },
+  child: Text("Restart tutorial"))
+```
+
+### Show dialog in onDismissFeature
+
+```dart
+FeatureTour(
+  onDismissFeature: (state, featureId) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      showDialog(
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Abort Tutorial?'),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      await state.abortTour();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Yes')),
+                [...]
+            );
+          });
+    });
+  },
+  [...]
 ```
 
 ## Status
