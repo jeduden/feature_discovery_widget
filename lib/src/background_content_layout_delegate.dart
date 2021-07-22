@@ -131,12 +131,11 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
       case FeatureOverlayState.opened:
         matchedRadius *= 1;
         break;
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.onOpening:
       case FeatureOverlayState.closed:
         matchedRadius = 0;
         break;
-      default:
-        // The switch statement should be exhaustive.
-        throw ArgumentError.value(state);
     }
 
     matchedRadius = max(matchedRadius, 0);
