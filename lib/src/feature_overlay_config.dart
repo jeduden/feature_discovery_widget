@@ -49,7 +49,7 @@ class FeatureOverlayConfig extends InheritedWidget {
   bool updateShouldNotify(covariant FeatureOverlayConfig oldWidget) {
     print(
         "FeatureOverlayConfig.updateShouldNotify activeFeatureId:$activeFeatureId oldWidget.activeFeatureId ${oldWidget.activeFeatureId}");
-    final result = child != oldWidget.child ||
+    final result = 
         enablePulsingAnimation != oldWidget.enablePulsingAnimation ||
         layerLink != oldWidget.layerLink ||
         eventsSink != oldWidget.eventsSink ||

@@ -113,17 +113,19 @@ class _MyHomePageState extends State<MyHomePage> {
             featureId: IncrementFeatureId,
             title: Text("Increment counter! With a very long title !"),
             description: Text(
+                "The appearance of this overlay was delayed by 2 seconds in onOpening.\n"
+                "After the completion of this step, a delay of 3 seconds was configured in onCompleted.\n"
                 "Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
             contentLocation: ContentLocation.above,
             overflowMode: OverflowMode.extendBackground,
             tapTarget: Icon(Icons.add),
             onOpening: () {
-              // delay appearance of this feature by a second
-              return Future.delayed(Duration(seconds: 1));
+              // delay appearance of this feature by 2 second
+              return Future.delayed(Duration(seconds: 2));
             },
             onCompleted: () {
-              // delay appearance of the next feature by a second
-              return Future.delayed(Duration(seconds: 1));
+              // delay appearance of the next feature by 2 second
+              return Future.delayed(Duration(seconds: 3));
             },
           ),
         },

@@ -68,11 +68,19 @@ void main() {
           featureId: "a",
           previousState: FeatureOverlayState.opened,
           state: FeatureOverlayState.completing));
+      await tester.pumpAndSettle();
       expect(providerKey.currentState!.activeFeatureId, equals("a"),
           reason: "Feature A must still be active during completing state.");
       providerKey.currentState!.eventsController.add(FeatureOverlayEvent(
           featureId: "a",
           previousState: FeatureOverlayState.completing,
+          state: FeatureOverlayState.onCompleted));
+      await tester.pumpAndSettle();
+      expect(providerKey.currentState!.activeFeatureId, equals("a"),
+          reason: "Feature A must still be active during onCompleted state.");
+      providerKey.currentState!.eventsController.add(FeatureOverlayEvent(
+          featureId: "a",
+          previousState: FeatureOverlayState.onCompleted,
           state: FeatureOverlayState.closed));
       await tester.pumpAndSettle();
       expect(providerKey.currentState!.activeFeatureId, equals("b"));
@@ -147,11 +155,11 @@ void main() {
         ..add(FeatureOverlayEvent(
             featureId: "a",
             state: FeatureOverlayState.closed,
-            previousState: FeatureOverlayState.completing))
+            previousState: FeatureOverlayState.onCompleted))
         ..add(FeatureOverlayEvent(
             featureId: "b",
             state: FeatureOverlayState.closed,
-            previousState: FeatureOverlayState.completing));
+            previousState: FeatureOverlayState.onCompleted));
       await tester.pumpAndSettle();
       expect(providerKey.currentState!.activeFeatureId, equals(null));
     });
@@ -193,7 +201,7 @@ void main() {
       ]);
     });
 
-    testWidgets("stores completed feature when in closed state and not during completing state.",
+    testWidgets("stores completed feature when in onCompleted state and not during completing state.",
         (WidgetTester tester) async {
       final providerKey = GlobalKey<FeatureOverlayConfigProviderState>();
       await tester.pumpWidget(MinimalTestWrapper(
@@ -212,6 +220,12 @@ void main() {
       providerKey.currentState!.eventsController.add(FeatureOverlayEvent(
           featureId: "a",
           previousState: FeatureOverlayState.completing,
+          state: FeatureOverlayState.onCompleted));
+      await tester.pumpAndSettle();
+      verifyNever(storeMock!({"a"}));
+      providerKey.currentState!.eventsController.add(FeatureOverlayEvent(
+          featureId: "a",
+          previousState: FeatureOverlayState.onCompleted,
           state: FeatureOverlayState.closed));
       await tester.pumpAndSettle();
       verify(storeMock!({"a"}));

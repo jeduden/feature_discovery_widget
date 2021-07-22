@@ -109,7 +109,7 @@ void main() {
             equals(true));
       });
      
-      test("child is different", () {
+      test("child is different => it should not return true! the child will always change in a build", () {
         expect(
             baseConfig.updateShouldNotify(FeatureOverlayConfig(
               enablePulsingAnimation: baseConfig.enablePulsingAnimation,
@@ -122,7 +122,7 @@ void main() {
               completeDuration: baseConfig.completeDuration,
               pulseDuration: baseConfig.pulseDuration,
             )),
-            equals(true));
+            equals(false));
       });
 
       test("openDuration is diffetent", () {

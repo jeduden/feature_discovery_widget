@@ -527,6 +527,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
 
   @override
   Widget build(BuildContext context) {
+    print("_FeatureOverlayState.build $this");
     final config = FeatureOverlayConfig.of(context);
     final key = ValueKey(widget.featureId);
     if (config.activeFeatureId == widget.featureId) {
