@@ -57,7 +57,7 @@ class FeatureOverlay extends StatefulWidget {
   /// The final tap target will already have a tap listener to finish each step.
   ///
   /// If you want to hit the tap target in integration tests, you should pass a [Key]
-  /// to this [Widget] instead of as the [Key] of [DescribedFeatureOverlay].
+  /// to this [Widget] instead of as the [Key] of [FeatureOverlay].
   final Widget tapTarget;
 
   /// Specifies how the content should be positioned relative to the tap target.
@@ -83,6 +83,14 @@ class FeatureOverlay extends StatefulWidget {
   /// The default value for [barrierDismissible] is `true`.
   final bool barrierDismissible;
 
+  /// Called after the feature finished completing state.
+  /// It moves to closed state only after this handler returns.
+  final Future<void> Function()? onCompleted;
+
+  /// Called before the feature is transitioning to opening state.
+  /// The feature will go into opening state when this handler returns
+  final Future<void> Function()? onOpening;
+
   FeatureOverlay({
     Key? key,
     required this.featureId,
@@ -92,6 +100,8 @@ class FeatureOverlay extends StatefulWidget {
     this.title,
     this.description,
     required this.tapTarget,
+    this.onCompleted,
+    this.onOpening,
     this.contentLocation = ContentLocation.trivial,
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
@@ -157,7 +167,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     super.dispose();
   }
 
-  void advanceState({FeatureOverlayState? to, required String? activeFeature}) {
+  void advanceState(
+      {FeatureOverlayState? to, required String? activeFeature}) async {
     setState(() {
       _activeFeature = activeFeature;
 
@@ -171,6 +182,12 @@ class _FeatureOverlayState extends State<FeatureOverlay>
       _animationController
           .stop(); // we don't want any completion notifications. anymore
       switch (_state) {
+        case FeatureOverlayState.onOpening:
+          assert(to == null);
+          _setOverlayState(FeatureOverlayState.opening);
+          _animationController.duration = config.openDuration;
+          _animationController.forward(from: 0);
+          break;
         case FeatureOverlayState.opening:
           assert(to == null || to == FeatureOverlayState.dismissing);
           if (_activeFeature != widget.featureId) {
@@ -187,6 +204,14 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           break;
         case FeatureOverlayState.completing:
           assert(to == null);
+          _setOverlayState(FeatureOverlayState.onCompleted);
+          WidgetsBinding.instance!.addPostFrameCallback((_) async {
+            await widget.onCompleted?.call();
+            advanceState(activeFeature: null);
+          });
+          break;
+        case FeatureOverlayState.onCompleted:
+          assert(to == null);
           _setOverlayState(FeatureOverlayState.closed);
           break;
         case FeatureOverlayState.dismissing:
@@ -196,9 +221,11 @@ class _FeatureOverlayState extends State<FeatureOverlay>
         case FeatureOverlayState.closed:
           assert(to == null || to == FeatureOverlayState.closed);
           if (_activeFeature == widget.featureId) {
-            _setOverlayState(FeatureOverlayState.opening);
-            _animationController.duration = config.openDuration;
-            _animationController.forward(from: 0);
+            _setOverlayState(FeatureOverlayState.onOpening);
+            WidgetsBinding.instance!.addPostFrameCallback((_) async {
+              await widget.onOpening?.call();
+              advanceState(activeFeature: _activeFeature);
+            });
           }
           break;
         case FeatureOverlayState.opened:
@@ -221,6 +248,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   void _setOverlayState(FeatureOverlayState nextState) {
     final previousState = _state;
     _state = nextState;
+    print("Next State: $nextState");
     config.eventsSink.add(FeatureOverlayEvent(
         state: _state,
         previousState: previousState,
@@ -298,6 +326,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
               startingBackgroundPosition, _animationController.value);
         case FeatureOverlayState.opened:
           return endingBackgroundPosition;
+        case FeatureOverlayState.onCompleted:
+        case FeatureOverlayState.onOpening:
         case FeatureOverlayState.closed:
           return startingBackgroundPosition;
       }
@@ -350,6 +380,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
               startingBackgroundPosition, _animationController.value);
         case FeatureOverlayState.opened:
           return endingBackgroundPosition;
+        case FeatureOverlayState.onCompleted:
+        case FeatureOverlayState.onOpening:
         case FeatureOverlayState.closed:
           return startingBackgroundPosition;
       }
@@ -495,6 +527,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
 
   @override
   Widget build(BuildContext context) {
+    print("_FeatureOverlayState.build $this");
     final config = FeatureOverlayConfig.of(context);
     final key = ValueKey(widget.featureId);
     if (config.activeFeatureId == widget.featureId) {
@@ -541,6 +574,8 @@ class _Background extends StatelessWidget {
         return defaultOpacity * (1 - adjustedPercent);
       case FeatureOverlayState.opened:
         return defaultOpacity;
+      case FeatureOverlayState.onOpening:
+      case FeatureOverlayState.onCompleted:
       case FeatureOverlayState.closed:
         return 0;
     }
@@ -602,6 +637,8 @@ class _Pulse extends StatelessWidget {
       case FeatureOverlayState.completing:
         return 0; //(44.0 + 35.0) * (1.0 - transitionProgress);
       case FeatureOverlayState.opening:
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.onOpening:
       case FeatureOverlayState.closed:
         return 0;
     }
@@ -617,6 +654,8 @@ class _Pulse extends StatelessWidget {
       case FeatureOverlayState.dismissing:
         return 0; //((1.0 - transitionProgress) * 0.5).clamp(0.0, 1.0);
       case FeatureOverlayState.opening:
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.onOpening:
       case FeatureOverlayState.closed:
         return 0;
     }
@@ -666,6 +705,8 @@ class _TapTarget extends StatelessWidget {
         return 1 -
             const Interval(0.7, 1, curve: Curves.easeOut)
                 .transform(transitionProgress);
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.onOpening:
       case FeatureOverlayState.closed:
         return 0;
       case FeatureOverlayState.opened:
@@ -677,6 +718,8 @@ class _TapTarget extends StatelessWidget {
 
   double get radius {
     switch (state) {
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.onOpening:
       case FeatureOverlayState.closed:
         return 0;
       case FeatureOverlayState.opening:

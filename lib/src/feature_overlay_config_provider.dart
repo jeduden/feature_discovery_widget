@@ -78,11 +78,13 @@ class FeatureOverlayConfigProviderState
   late StreamController<FeatureOverlayEvent> eventsController;
 
   Stream<FeatureOverlayEvent> get events => eventsController.stream;
+  late EventSink<FeatureOverlayEvent> eventsSink;
 
   @override
   void initState() {
     layerLink = LayerLink();
     eventsController = StreamController.broadcast();
+    eventsSink = eventsController.sink;
     print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();
   }
@@ -107,7 +109,7 @@ class FeatureOverlayConfigProviderState
     final config = FeatureOverlayConfig(
       layerLink: layerLink,
       child: widget.child,
-      eventsSink: eventsController.sink,
+      eventsSink: eventsSink,
       activeFeatureId: activeFeatureId,
       openDuration: widget.openDuration,
       completeDuration: widget.completeDuration,

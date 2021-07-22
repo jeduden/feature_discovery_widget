@@ -38,6 +38,8 @@ class Content extends StatelessWidget {
 
   double get opacity {
     switch (state) {
+      case FeatureOverlayState.onOpening:
+      case FeatureOverlayState.onCompleted:
       case FeatureOverlayState.closed:
         return 0;
       case FeatureOverlayState.opening:

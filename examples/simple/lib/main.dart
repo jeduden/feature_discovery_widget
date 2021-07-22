@@ -68,7 +68,8 @@ class MyApp extends StatelessWidget {
                                         Navigator.of(context).pop();
                                         // dont do anything to show the overlay again
                                       },
-                                      child: Text('No, continue with tutorial next time'))
+                                      child: Text(
+                                          'No, continue with tutorial next time'))
                                 ],
                               );
                             });
@@ -109,13 +110,24 @@ class _MyHomePageState extends State<MyHomePage> {
     return IndexedFeatureOverlay(
         featureOverlays: {
           FeatureOverlay(
-              featureId: IncrementFeatureId,
-              title: Text("Increment counter! With a very long title !"),
-              description: Text(
-                  "Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
-              contentLocation: ContentLocation.above,
-              overflowMode: OverflowMode.extendBackground,
-              tapTarget: Icon(Icons.add)),
+            featureId: IncrementFeatureId,
+            title: Text("Increment counter! With a very long title !"),
+            description: Text(
+                "The appearance of this overlay was delayed by 2 seconds in onOpening.\n"
+                "After the completion of this step, a delay of 3 seconds was configured in onCompleted.\n"
+                "Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
+            contentLocation: ContentLocation.above,
+            overflowMode: OverflowMode.extendBackground,
+            tapTarget: Icon(Icons.add),
+            onOpening: () {
+              // delay appearance of this feature by 2 second
+              return Future.delayed(Duration(seconds: 2));
+            },
+            onCompleted: () {
+              // delay appearance of the next feature by 2 second
+              return Future.delayed(Duration(seconds: 3));
+            },
+          ),
         },
         child: Scaffold(
             appBar: AppBar(
@@ -124,13 +136,14 @@ class _MyHomePageState extends State<MyHomePage> {
             body: IndexedFeatureOverlay(
                 featureOverlays: {
                   FeatureOverlay(
-                      featureId: CounterFeatureId,
-                      title: Text(
-                          "This is the counter. Longer Line ! Longer and Longer"),
-                      description:
-                          Text("It increases indefinetly.\nIt starts at 0."),
-                      contentLocation: ContentLocation.below,
-                      tapTarget: Icon(Icons.access_alarm))
+                    featureId: CounterFeatureId,
+                    title: Text(
+                        "This is the counter. Longer Line ! Longer and Longer"),
+                    description:
+                        Text("It increases indefinetly.\nIt starts at 0."),
+                    contentLocation: ContentLocation.below,
+                    tapTarget: Icon(Icons.access_alarm),
+                  ),
                 },
                 child: Center(
                   child: Column(

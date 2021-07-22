@@ -29,9 +29,11 @@ enum OverflowMode {
 /// Thus, this cannot be called OverlayState.
 enum FeatureOverlayState {
   closed,
+  onOpening,
   opening,
   opened,
   completing,
+  onCompleted,
   dismissing,
 }
 
