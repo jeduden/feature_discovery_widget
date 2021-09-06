@@ -9,7 +9,8 @@ import 'widgets.dart';
 
 class DummyWidget extends StatefulWidget {
   final void Function() onDepsChanged;
-  DummyWidget({required Key? key, required this.onDepsChanged}) : super(key:key);
+  DummyWidget({required Key? key, required this.onDepsChanged})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -33,15 +34,14 @@ class DummyState extends State<DummyWidget> {
 
 void main() {
   group("FeatureOverlayConfigProvider", () {
-    testWidgets(
-        "does not retrigger builds when nothing changes in the config",
+    testWidgets("does not retrigger builds when nothing changes in the config",
         (WidgetTester tester) async {
       TestWidgetsFlutterBinding.ensureInitialized();
 
       final dummyKey = GlobalKey<DummyState>();
       int onDepsCalls = 0;
       final onDepsChanged = () {
-        onDepsCalls ++;
+        onDepsCalls++;
       };
 
       await tester.pumpWidget(MinimalTestWrapper(
@@ -50,8 +50,15 @@ void main() {
                   enablePulsingAnimation: false,
                   openDuration: Duration(milliseconds: 0),
                   dismissDuration: Duration(milliseconds: 0),
-                  child: DummyWidget(key: dummyKey, onDepsChanged: onDepsChanged,)))));
-      final text = find.descendant(of:find.byType(DummyWidget), matching:find.byType(Text)).evaluate().single.widget as Text;
+                  child: DummyWidget(
+                    key: dummyKey,
+                    onDepsChanged: onDepsChanged,
+                  )))));
+      final text = find
+          .descendant(of: find.byType(DummyWidget), matching: find.byType(Text))
+          .evaluate()
+          .single
+          .widget as Text;
       expect(onDepsCalls, equals(1));
       await tester.pumpWidget(MinimalTestWrapper(
           child: Scaffold(
@@ -59,8 +66,38 @@ void main() {
                   enablePulsingAnimation: false,
                   openDuration: Duration(milliseconds: 0),
                   dismissDuration: Duration(milliseconds: 0),
-                  child: DummyWidget(key: dummyKey,onDepsChanged: onDepsChanged)))));
-      expect(onDepsCalls, equals(1), reason: "Should still have a single deps call for the state");
+                  child: DummyWidget(
+                      key: dummyKey, onDepsChanged: onDepsChanged)))));
+      expect(onDepsCalls, equals(1),
+          reason: "Should still have a single deps call for the state");
+    });
+
+    testWidgets("calls onInitState", (WidgetTester tester) async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+      var initStateCalled = 0;
+
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: Scaffold(
+              body: FeatureOverlayConfigProvider(
+                  onInitState: (FeatureOverlayConfigProviderState _) =>
+                      {initStateCalled = initStateCalled + 1},
+                  enablePulsingAnimation: false,
+                  openDuration: Duration(milliseconds: 0),
+                  dismissDuration: Duration(milliseconds: 0),
+                  child: Container()))));
+      expect(initStateCalled, equals(1));
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: Scaffold(
+              body: FeatureOverlayConfigProvider(
+                  onInitState: (FeatureOverlayConfigProviderState _) =>
+                      {initStateCalled = initStateCalled + 1},
+                  enablePulsingAnimation: false,
+                  openDuration: Duration(milliseconds: 0),
+                  dismissDuration: Duration(milliseconds: 0),
+                  child: Container()))));
+      expect(initStateCalled, equals(1),
+          reason: "Only be called initially the state initialization");
     });
   });
 }
