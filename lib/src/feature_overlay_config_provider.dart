@@ -32,9 +32,13 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
 
+  /// Called during initState of the provider.
+  final void Function(FeatureOverlayConfigProviderState)? onInitState;
+
   const FeatureOverlayConfigProvider(
       {Key? key,
       required this.child,
+      this.onInitState,
       this.enablePulsingAnimation = true,
       this.openDuration = const Duration(milliseconds: 250),
       this.pulseDuration = const Duration(milliseconds: 1000),
@@ -85,6 +89,7 @@ class FeatureOverlayConfigProviderState
     layerLink = LayerLink();
     eventsController = StreamController.broadcast();
     eventsSink = eventsController.sink;
+    widget.onInitState?.call(this);
     print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();
   }
