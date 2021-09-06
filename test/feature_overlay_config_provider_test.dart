@@ -80,7 +80,7 @@ void main() {
       await tester.pumpWidget(MinimalTestWrapper(
           child: Scaffold(
               body: FeatureOverlayConfigProvider(
-                  onInitState: (FeatureOverlayConfigProviderState _) =>
+                  onInitState: (FeatureOverlayConfigChangeNotifier _) =>
                       {initStateCalled = initStateCalled + 1},
                   enablePulsingAnimation: false,
                   openDuration: Duration(milliseconds: 0),
@@ -90,7 +90,7 @@ void main() {
       await tester.pumpWidget(MinimalTestWrapper(
           child: Scaffold(
               body: FeatureOverlayConfigProvider(
-                  onInitState: (FeatureOverlayConfigProviderState _) =>
+                  onInitState: (FeatureOverlayConfigChangeNotifier _) =>
                       {initStateCalled = initStateCalled + 1},
                   enablePulsingAnimation: false,
                   openDuration: Duration(milliseconds: 0),

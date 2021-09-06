@@ -7,6 +7,12 @@ import 'package:flutter/material.dart';
 import 'feature_overlay_config.dart';
 import 'feature_overlay_event.dart';
 
+/// Provides [notifyActiveFeature] to change the active active feature.
+abstract class FeatureOverlayConfigChangeNotifier {
+  /// Change the active feature. Pass [null] to deactive all features.
+  void notifyActiveFeature(String? featureId);
+}
+
 /// Provides [FeatureOverlayConfig] to the [child],
 /// [FeatureOverlayConfigChangeNotifier] with [notifierOf] to modify the currently 
 /// active feature overlay,
@@ -33,7 +39,7 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   final Duration dismissDuration;
 
   /// Called during initState of the provider.
-  final void Function(FeatureOverlayConfigProviderState)? onInitState;
+  final void Function(FeatureOverlayConfigChangeNotifier notifier)? onInitState;
 
   const FeatureOverlayConfigProvider(
       {Key? key,
@@ -64,11 +70,7 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   }
 }
 
-/// Provides [notifyActiveFeature] to change the active active feature.
-abstract class FeatureOverlayConfigChangeNotifier {
-  /// Change the active feature. Pass [null] to deactive all features.
-  void notifyActiveFeature(String? featureId);
-}
+
 
 class FeatureOverlayConfigProviderState
     extends State<FeatureOverlayConfigProvider>
