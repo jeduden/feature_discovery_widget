@@ -7,6 +7,12 @@ import 'package:flutter/material.dart';
 import 'feature_overlay_config.dart';
 import 'feature_overlay_event.dart';
 
+/// Provides [notifyActiveFeature] to change the active active feature.
+abstract class FeatureOverlayConfigChangeNotifier {
+  /// Change the active feature. Pass [null] to deactive all features.
+  void notifyActiveFeature(String? featureId);
+}
+
 /// Provides [FeatureOverlayConfig] to the [child],
 /// [FeatureOverlayConfigChangeNotifier] with [notifierOf] to modify the currently 
 /// active feature overlay,
@@ -33,12 +39,16 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   final Duration dismissDuration;
 
   /// Called during initState of the provider.
-  final void Function(FeatureOverlayConfigProviderState)? onInitState;
+  final void Function(FeatureOverlayConfigChangeNotifier notifier)? onInitState;
+
+  /// Initial active feature id
+  final String? initialActiveId;
 
   const FeatureOverlayConfigProvider(
       {Key? key,
       required this.child,
       this.onInitState,
+      this.initialActiveId,
       this.enablePulsingAnimation = true,
       this.openDuration = const Duration(milliseconds: 250),
       this.pulseDuration = const Duration(milliseconds: 1000),
@@ -64,11 +74,7 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   }
 }
 
-/// Provides [notifyActiveFeature] to change the active active feature.
-abstract class FeatureOverlayConfigChangeNotifier {
-  /// Change the active feature. Pass [null] to deactive all features.
-  void notifyActiveFeature(String? featureId);
-}
+
 
 class FeatureOverlayConfigProviderState
     extends State<FeatureOverlayConfigProvider>
@@ -89,6 +95,7 @@ class FeatureOverlayConfigProviderState
     layerLink = LayerLink();
     eventsController = StreamController.broadcast();
     eventsSink = eventsController.sink;
+    activeFeatureId = widget.initialActiveId;
     widget.onInitState?.call(this);
     print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();
