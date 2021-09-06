@@ -41,10 +41,14 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   /// Called during initState of the provider.
   final void Function(FeatureOverlayConfigChangeNotifier notifier)? onInitState;
 
+  /// Initial active feature id
+  final String? initialActiveId;
+
   const FeatureOverlayConfigProvider(
       {Key? key,
       required this.child,
       this.onInitState,
+      this.initialActiveId,
       this.enablePulsingAnimation = true,
       this.openDuration = const Duration(milliseconds: 250),
       this.pulseDuration = const Duration(milliseconds: 1000),
@@ -91,6 +95,7 @@ class FeatureOverlayConfigProviderState
     layerLink = LayerLink();
     eventsController = StreamController.broadcast();
     eventsSink = eventsController.sink;
+    activeFeatureId = widget.initialActiveId;
     widget.onInitState?.call(this);
     print("FeatureOverlayConfigProviderState.initState $this");
     super.initState();

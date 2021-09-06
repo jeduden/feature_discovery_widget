@@ -99,5 +99,25 @@ void main() {
       expect(initStateCalled, equals(1),
           reason: "Only be called initially the state initialization");
     });
+
+    testWidgets("initActiveId is set", (WidgetTester tester) async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+      String? initialActiveIdRead;
+
+      await tester.pumpWidget(MinimalTestWrapper(
+          child: Scaffold(
+              body: FeatureOverlayConfigProvider(
+                  initialActiveId: "abc",
+                  enablePulsingAnimation: false,
+                  openDuration: Duration(milliseconds: 0),
+                  dismissDuration: Duration(milliseconds: 0),
+                  child: Builder(builder: (BuildContext context) {
+                    final provider = FeatureOverlayConfig.of(context);
+                    initialActiveIdRead = provider.activeFeatureId;
+                    return Container();
+                  })))));
+      expect(initialActiveIdRead, equals("abc"));
+    });
   });
 }
