@@ -91,12 +91,20 @@ class FeatureOverlay extends StatefulWidget {
   /// The feature will go into opening state when this handler returns
   final Future<void> Function()? onOpening;
 
-
   /// Pulse radius when contracted
   final double? pulseBaseRadius;
 
   /// Size of expansion in addition to contracted radius
   final double? pulseRadiusExpansion;
+
+  /// Tap target base radius
+  double? tapTargetBaseRadius;
+
+  /// Tap target expansion during opening
+  double? tapTargetOpeningExpansion;
+
+  /// Tap target pulsing expansion when opened
+  double? tapTargetOpenedExpansion;
 
   FeatureOverlay({
     Key? key,
@@ -115,6 +123,9 @@ class FeatureOverlay extends StatefulWidget {
     this.barrierDismissible = true,
     this.pulseBaseRadius,
     this.pulseRadiusExpansion,
+    this.tapTargetBaseRadius,
+    this.tapTargetOpeningExpansion,
+    this.tapTargetOpenedExpansion,
   }) : super(key: key);
 
   @override
@@ -413,8 +424,9 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     // otherwise a top on the target is not detected,
     // and the background is hit instead.
 
+    final normRadius = _TapTarget.calcNormalRadius(baseRadius: widget.tapTargetBaseRadius,radiusOpeningExpansion: widget.tapTargetOpeningExpansion);
     final tapTargetRadiusOffset =
-        Offset(_TapTarget.maxRadius, _TapTarget.maxRadius) * sqrt(2);
+        Offset(normRadius, normRadius) * sqrt(2);
 
     final anchor = tapTargetRadiusOffset; //tapTargetRadiusOffset;
 
@@ -447,10 +459,22 @@ class _FeatureOverlayState extends State<FeatureOverlay>
       dx = -contentCenterAnchorOffset.dx;
     }
 
+    final tapTarget = _TapTarget(
+                state: _state,
+                transitionProgress: _animationController.value,
+                anchor: anchor,
+                color: widget.targetColor,
+                onPressed: _complete,
+                child: widget.tapTarget,
+                baseRadius: widget.tapTargetBaseRadius,
+                radiusOpeningExpansion: widget.tapTargetOpeningExpansion,
+                radiusOpenedExpansion: widget.tapTargetOpenedExpansion,
+              );
+
     final contentPosition = Offset(
       dx,
       anchor.dy +
-          contentOffsetMultiplier * (44 + 20), // 44 is the tap target's radius.
+          contentOffsetMultiplier * tapTarget.maxRadius,
     );
 
     Widget background = GestureDetector(
@@ -523,14 +547,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                 anchor: anchor,
                 color: widget.targetColor,
               ),
-              _TapTarget(
-                state: _state,
-                transitionProgress: _animationController.value,
-                anchor: anchor,
-                color: widget.targetColor,
-                onPressed: _complete,
-                child: widget.tapTarget,
-              ),
+              tapTarget,
             ],
           ))
     ]);
@@ -633,10 +650,12 @@ class _Pulse extends StatelessWidget {
     required this.state,
     required this.transitionProgress,
     required this.anchor,
-    required this.color, 
-    double? baseRadius, 
+    required this.color,
+    double? baseRadius,
     double? radiusExpansion,
-  }) : baseRadius = baseRadius ?? 44.0, radiusExpansion = radiusExpansion??35.0, super(key: key);
+  })  : baseRadius = baseRadius ?? 44.0,
+        radiusExpansion = radiusExpansion ?? 35.0,
+        super(key: key);
 
   double get radius {
     switch (state) {
@@ -698,7 +717,14 @@ class _TapTarget extends StatelessWidget {
   final Offset anchor;
   final Widget child;
   final Color color;
+  final double baseRadius;
+  final double radiusOpeningExpansion;
+  final double radiusOpenedExpansion;
+
   final VoidCallback onPressed;
+
+  static const defaultRadiusOpeningExpansion = 24.0;
+  static const defaultBaseRadius = 20.0;
 
   const _TapTarget({
     Key? key,
@@ -708,7 +734,14 @@ class _TapTarget extends StatelessWidget {
     required this.color,
     required this.state,
     required this.transitionProgress,
-  }) : super(key: key);
+    double? baseRadius,
+    double? radiusOpeningExpansion,
+    double? radiusOpenedExpansion,
+  })  : baseRadius = baseRadius ?? defaultBaseRadius,
+        radiusOpeningExpansion =
+            radiusOpeningExpansion ?? defaultRadiusOpeningExpansion,
+        radiusOpenedExpansion = radiusOpenedExpansion ?? 20.0,
+        super(key: key);
 
   double get opacity {
     switch (state) {
@@ -729,7 +762,17 @@ class _TapTarget extends StatelessWidget {
     }
   }
 
-  static double get maxRadius => 20 + 24;
+  double get maxRadius => normalRadius + radiusOpenedExpansion;
+
+  double get normalRadius => calcNormalRadius(
+      baseRadius: baseRadius, radiusOpeningExpansion: radiusOpeningExpansion);
+
+  static double calcNormalRadius({
+    double? baseRadius,
+    double? radiusOpeningExpansion,
+  }) =>
+      (baseRadius ?? defaultBaseRadius) +
+      (radiusOpeningExpansion ?? defaultRadiusOpeningExpansion);
 
   double get radius {
     switch (state) {
@@ -738,7 +781,7 @@ class _TapTarget extends StatelessWidget {
       case FeatureOverlayState.closed:
         return 0;
       case FeatureOverlayState.opening:
-        return 20 + 24 * transitionProgress;
+        return baseRadius + radiusOpenedExpansion * transitionProgress;
       case FeatureOverlayState.opened:
         double expandedPercent;
         if (transitionProgress < 0.3) {
@@ -748,10 +791,10 @@ class _TapTarget extends StatelessWidget {
         } else {
           expandedPercent = 0;
         }
-        return 44 + (20 * expandedPercent);
+        return normalRadius + (radiusOpenedExpansion * expandedPercent);
       case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
-        return 20 + 24 * (1 - transitionProgress);
+        return normalRadius * (1 - transitionProgress);
     }
   }
 
