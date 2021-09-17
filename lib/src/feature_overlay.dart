@@ -91,6 +91,13 @@ class FeatureOverlay extends StatefulWidget {
   /// The feature will go into opening state when this handler returns
   final Future<void> Function()? onOpening;
 
+
+  /// Pulse radius when contracted
+  final double? pulseBaseRadius;
+
+  /// Size of expansion in addition to contracted radius
+  final double? pulseRadiusExpansion;
+
   FeatureOverlay({
     Key? key,
     required this.featureId,
@@ -106,6 +113,8 @@ class FeatureOverlay extends StatefulWidget {
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
     this.barrierDismissible = true,
+    this.pulseBaseRadius,
+    this.pulseRadiusExpansion,
   }) : super(key: key);
 
   @override
@@ -507,6 +516,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                     ],
                   )),
               _Pulse(
+                baseRadius: widget.pulseBaseRadius,
+                radiusExpansion: widget.pulseRadiusExpansion,
                 state: _state,
                 transitionProgress: _animationController.value,
                 anchor: anchor,
@@ -612,6 +623,8 @@ class _Background extends StatelessWidget {
 class _Pulse extends StatelessWidget {
   final FeatureOverlayState state;
   final double transitionProgress;
+  final double baseRadius;
+  final double radiusExpansion;
   final Offset anchor;
   final Color color;
 
@@ -620,8 +633,10 @@ class _Pulse extends StatelessWidget {
     required this.state,
     required this.transitionProgress,
     required this.anchor,
-    required this.color,
-  }) : super(key: key);
+    required this.color, 
+    double? baseRadius, 
+    double? radiusExpansion,
+  }) : baseRadius = baseRadius ?? 44.0, radiusExpansion = radiusExpansion??35.0, super(key: key);
 
   double get radius {
     switch (state) {
@@ -632,7 +647,7 @@ class _Pulse extends StatelessWidget {
         } else {
           expandedPercent = 0.0;
         }
-        return 44.0 + (35.0 * expandedPercent);
+        return baseRadius + (radiusExpansion * expandedPercent);
       case FeatureOverlayState.dismissing:
       case FeatureOverlayState.completing:
         return 0; //(44.0 + 35.0) * (1.0 - transitionProgress);

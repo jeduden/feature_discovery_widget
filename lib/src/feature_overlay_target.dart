@@ -12,20 +12,20 @@ import 'feature_overlay_config.dart';
 class FeatureOverlayTarget extends StatelessWidget {
 
   /// FeatureId of the [FeatureOverlay] to be shown
-  final String featureId;
+  final Set<String> featureIds;
 
   /// Target of the [FeatureOverlay] when shown
   final Widget child;
 
   const FeatureOverlayTarget(
-      {Key? key, required this.featureId, required this.child})
+      {Key? key, required this.featureIds, required this.child})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final config = FeatureOverlayConfig.of(context);
     final wrapperKey = ValueKey("wrap"); // does this improve perf?
-    if (config.activeFeatureId == featureId) {
+    if (featureIds.contains(config.activeFeatureId)) {
       return CompositedTransformTarget(
         key: wrapperKey,
         link: config.layerLink,
