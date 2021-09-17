@@ -34,7 +34,7 @@ void main() {
                             .spaceBetween, //make sure overlay is far away
                         children: [
                           FeatureOverlayTarget(
-                              featureId: "myFeature", child: Container()),
+                              featureIds: {"myFeature"}, child: Container()),
                           IconButton(
                               onPressed: () => null,
                               icon: Icon(Icons.access_alarm)),

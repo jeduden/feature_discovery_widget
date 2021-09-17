@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
                     // methods.
                     child:
                         MyHomePage(title: 'Simple Feature Discovery Example'),
-                    featureIds: [IncrementFeatureId, CounterFeatureId],
+                    featureIds: [IncrementFeatureId, IncrementFeatureId, CounterFeatureId],
                   )),
         ));
   }
@@ -153,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         'You have pushed the button this many times:',
                       ),
                       FeatureOverlayTarget(
-                          featureId: CounterFeatureId,
+                          featureIds: {CounterFeatureId},
                           child: Text(
                             '$_counter',
                             style: Theme.of(context).textTheme.headline4,
@@ -168,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 )),
             floatingActionButton: FeatureOverlayTarget(
-                featureId: IncrementFeatureId,
+                featureIds: {IncrementFeatureId},
                 child: FloatingActionButton(
                     onPressed: _incrementCounter,
                     tooltip: 'Increment',

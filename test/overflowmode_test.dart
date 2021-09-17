@@ -62,7 +62,7 @@ void main() {
                           child: Align(
                             alignment: alignTarget,
                             child: FeatureOverlayTarget(
-                                featureId: featureId,
+                                featureIds: {featureId},
                                 child: Icon(Icons.ac_unit)),
                           ))),
                 )));
