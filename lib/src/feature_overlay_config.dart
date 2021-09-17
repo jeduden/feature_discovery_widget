@@ -69,6 +69,10 @@ class FeatureOverlayConfig extends InheritedWidget {
     return result!;
   }
 
+  static FeatureOverlayConfig? whenPresentOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<FeatureOverlayConfig>();
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
