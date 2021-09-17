@@ -127,6 +127,11 @@ class _MyHomePageState extends State<MyHomePage> {
               // delay appearance of the next feature by 2 second
               return Future.delayed(Duration(seconds: 3));
             },
+            tapTargetBaseRadius: 50,
+            tapTargetOpeningExpansion: 20,
+            tapTargetOpenedExpansion: 50,
+            pulseBaseRadius: 50+20,
+            pulseRadiusExpansion: 50,
           ),
         },
         child: Scaffold(
