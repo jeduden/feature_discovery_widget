@@ -239,7 +239,10 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           _setOverlayState(FeatureOverlayState.closed);
           break;
         case FeatureOverlayState.closed:
-          assert(to == null || to == FeatureOverlayState.closed);
+          //assert(to == null || to == FeatureOverlayState.closed);
+          if(to != null && to != FeatureOverlayState.closed) {
+              print("_DescribedFeatureOverlayState: is this a bug: transition from closed -> $to for feature: \"${widget.featureId}\" active feature:\"$_activeFeature\"");
+          }
           if (_activeFeature == widget.featureId) {
             _setOverlayState(FeatureOverlayState.onOpening);
             WidgetsBinding.instance!.addPostFrameCallback((_) async {

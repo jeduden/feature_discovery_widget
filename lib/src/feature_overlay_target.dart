@@ -23,12 +23,12 @@ class FeatureOverlayTarget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = FeatureOverlayConfig.of(context);
+    final config = FeatureOverlayConfig.whenPresentOf(context);
     final wrapperKey = ValueKey("wrap"); // does this improve perf?
-    if (featureIds.contains(config.activeFeatureId)) {
+    if (featureIds.contains(config?.activeFeatureId ?? null)) {
       return CompositedTransformTarget(
         key: wrapperKey,
-        link: config.layerLink,
+        link: config!.layerLink,
         child: child,
       );
     } else {
