@@ -84,8 +84,8 @@ class LooseLeaderLayer extends ContainerLayer {
 
   @override
   void detach() {
-    //assert(link.leader == this); seems to not make sense to be this strict in our case.
-    link._leader = null;
+    if(link.leader == this) //seems to not make sense to be this strict in our case.
+      link._leader = null; //we only reset the link._leader if we are it
     _lastOffset = null;
     super.detach();
   }
