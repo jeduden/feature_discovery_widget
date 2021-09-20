@@ -77,7 +77,8 @@ class LooseLeaderLayer extends ContainerLayer {
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link.leader == null);
+    //assert(link.leader == null); since we are not restrict about render order,
+    // we also cannot guarantee that the leader link was already freed when we need it
     _lastOffset = null;
     link._leader = this;
   }
