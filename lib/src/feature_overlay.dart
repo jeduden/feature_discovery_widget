@@ -280,6 +280,12 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   }
 
   void _dismiss() {
+    final dismissible = widget.dismissible ?? FeatureOverlayConfig.of(context).dismissibleDefault;
+    if(!dismissible) {
+      print("Ignore dismiss.");
+      return;
+    }
+
     if( _state != FeatureOverlayState.completing && _state != FeatureOverlayState.onCompleted) {
       // don't dismiss during completing + onCompleted
       advanceState(
@@ -493,10 +499,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
       onPanUpdate: (_) => _dismiss(),
     );
 
-    final dismissible = widget.dismissible ?? FeatureOverlayConfig.of(context).dismissibleDefault;
-
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
-      if (dismissible) background,
+      background,
       CompositedTransformLooseFollower(
           link: link,
           targetAnchor: Alignment.center,
@@ -532,7 +536,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                             state: _state,
                             overflowMode: widget.overflowMode,
                             onTap: () async {
-                              if (dismissible) _dismiss();
+                              _dismiss();
                             }),
                       ),
                       LayoutId(
