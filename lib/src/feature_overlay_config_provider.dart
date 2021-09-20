@@ -45,12 +45,16 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   /// Initial active feature id
   final String? initialActiveId;
 
+  /// Default value for dismissible
+  final bool dismissibleDefault;
+
   const FeatureOverlayConfigProvider(
       {Key? key,
       required this.child,
       this.onInitState,
       this.initialActiveId,
       this.enablePulsingAnimation = true,
+      this.dismissibleDefault = true,
       this.openDuration = const Duration(milliseconds: 250),
       this.pulseDuration = const Duration(milliseconds: 1000),
       this.completeDuration = const Duration(milliseconds: 400),
@@ -128,6 +132,7 @@ class FeatureOverlayConfigProviderState
       completeDuration: widget.completeDuration,
       dismissDuration: widget.dismissDuration,
       pulseDuration: widget.pulseDuration,
+      dismissibleDefault: widget.dismissibleDefault,
     );
     print(
         "FeatureOverlayConfigProviderState.build $this => $config activeFeatureId:$activeFeatureId");

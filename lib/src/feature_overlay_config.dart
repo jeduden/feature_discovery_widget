@@ -62,6 +62,7 @@ class FeatureOverlayConfig extends InheritedWidget {
         openDuration != oldWidget.openDuration ||
         pulseDuration != oldWidget.pulseDuration ||
         completeDuration != oldWidget.completeDuration ||
+        dismissibleDefault != oldWidget.dismissibleDefault ||
         dismissDuration != oldWidget.dismissDuration;
     print("FeatureOverlayConfig.updateShouldNotify returns $result");
     return result;
