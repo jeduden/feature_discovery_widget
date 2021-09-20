@@ -51,18 +51,13 @@ class LooseLeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LooseLeaderLayer({ required LooseLayerLink link, required this.offset }) : assert(link != null), _link = link;
+  LooseLeaderLayer({ required this.link, required this.offset });
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
-  LooseLayerLink get link => _link;
-  set link(LooseLayerLink value) {
-    assert(value != null);
-    _link = value;
-  }
-  LooseLayerLink _link;
+  final LooseLayerLink link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -87,7 +82,7 @@ class LooseLeaderLayer extends ContainerLayer {
 
   @override
   void detach() {
-    assert(link.leader == this);
+    //assert(link.leader == this); seems to not make sense to be this strict in our case.
     link._leader = null;
     _lastOffset = null;
     super.detach();
@@ -485,12 +480,12 @@ class RenderLooseLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (layer == null) {
+    final LooseLeaderLayer? leaderLayer = layer as LooseLeaderLayer?;
+
+    if (leaderLayer == null || leaderLayer.link != link) {
       layer = LooseLeaderLayer(link: link, offset: offset);
     } else {
-      final LooseLeaderLayer leaderLayer = layer! as LooseLeaderLayer;
       leaderLayer
-        ..link = link
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
