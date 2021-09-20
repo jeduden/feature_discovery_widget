@@ -81,8 +81,8 @@ class FeatureOverlay extends StatefulWidget {
 
   /// Controls whether the overlay should be dismissed on touching outside or not.
   ///
-  /// The default value for [barrierDismissible] is `true`.
-  final bool barrierDismissible;
+  /// The default value for [dismissible] will be taking for [FeatureOverlayConfig.dismissableDefault]
+  final bool? dismissible;
 
   /// Called after the feature finished completing state.
   /// It moves to closed state only after this handler returns.
@@ -121,7 +121,7 @@ class FeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentLocation.trivial,
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
-    this.barrierDismissible = true,
+    this.dismissible,
     this.pulseBaseRadius,
     this.pulseRadiusExpansion,
     this.tapTargetBaseRadius,
@@ -493,8 +493,10 @@ class _FeatureOverlayState extends State<FeatureOverlay>
       onPanUpdate: (_) => _dismiss(),
     );
 
+    final dismissible = widget.dismissible ?? FeatureOverlayConfig.of(context).dismissibleDefault;
+
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
-      if (widget.barrierDismissible) background,
+      if (dismissible) background,
       CompositedTransformLooseFollower(
           link: link,
           targetAnchor: Alignment.center,
@@ -530,7 +532,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                             state: _state,
                             overflowMode: widget.overflowMode,
                             onTap: () async {
-                              if (widget.barrierDismissible) _dismiss();
+                              if (dismissible) _dismiss();
                             }),
                       ),
                       LayoutId(

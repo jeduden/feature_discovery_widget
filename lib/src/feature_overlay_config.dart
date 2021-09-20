@@ -31,6 +31,9 @@ class FeatureOverlayConfig extends InheritedWidget {
   /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
 
+  /// Default value for dismissible
+  final bool dismissibleDefault;
+
   final LooseLayerLink layerLink;
 
   FeatureOverlayConfig({
@@ -40,6 +43,7 @@ class FeatureOverlayConfig extends InheritedWidget {
     required this.layerLink,
     required this.eventsSink,
     this.activeFeatureId,
+    this.dismissibleDefault = true,
     this.openDuration: const Duration(milliseconds: 500),
     this.pulseDuration: const Duration(milliseconds: 1000),
     this.completeDuration: const Duration(milliseconds: 250),
