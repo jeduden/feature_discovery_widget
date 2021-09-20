@@ -48,7 +48,7 @@ void main() {
         await tester.pumpWidget(MinimalTestWrapper(screenSize: screenSize,
                 child: FeatureOverlayConfig(
                   enablePulsingAnimation: false,
-                  layerLink: LayerLink(),
+                  layerLink: LooseLayerLink(),
                   activeFeatureId: featureId,
                   eventsSink: eventController.sink,
                   openDuration: Duration(milliseconds: 10),

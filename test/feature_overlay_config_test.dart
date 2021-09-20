@@ -25,7 +25,7 @@ void main() {
       events.clear();
       baseConfig = FeatureOverlayConfig(
           enablePulsingAnimation: false,
-          layerLink: LayerLink(),
+          layerLink: LooseLayerLink(),
           activeFeatureId: "myFeature",
           eventsSink: eventController.sink,
           child: FeatureOverlay(
@@ -67,7 +67,7 @@ void main() {
         expect(
             baseConfig.updateShouldNotify(FeatureOverlayConfig(
               enablePulsingAnimation: baseConfig.enablePulsingAnimation,
-              layerLink: LayerLink(),
+              layerLink: LooseLayerLink(),
               activeFeatureId: baseConfig.activeFeatureId,
               eventsSink: baseConfig.eventsSink,
               child: baseConfig.child,
