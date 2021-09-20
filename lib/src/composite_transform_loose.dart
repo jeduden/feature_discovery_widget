@@ -6,7 +6,9 @@ import 'package:vector_math/vector_math_64.dart';
 
 /// Based on Flutters CompositeTransform widgets/layers,
 /// but relaxed the requirements. since it is fine for feature overlays to lag a frame behind.
+/// except that we disallow updating the link in the widgets.
 /// It is better than to have to figure out the paint order of a large app and guarantee it as application developer.
+/// 
 
 /// An object that a [LooseLeaderLayer] can register with.
 ///
@@ -155,23 +157,18 @@ class LooseFollowerLayer extends ContainerLayer {
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
   LooseFollowerLayer({
-    required LooseLayerLink link,
+    required this.link,
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null), _link = link;
+  });
 
   /// The link to the [LeaderLayer].
   ///
   /// The same object should be provided to a [LeaderLayer] that is earlier in
   /// the layer tree. When this layer is composited, it will apply a transform
   /// that moves its children to match the position of the [LeaderLayer].
-  LooseLayerLink get link => _link;
-  set link(LooseLayerLink value) {
-    assert(value != null);
-    _link = value;
-  }
-  LooseLayerLink _link;
+  final LooseLayerLink link;
 
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].
@@ -438,30 +435,16 @@ class RenderLooseLeaderLayer extends RenderProxyBox {
   ///
   /// The [link] must not be null.
   RenderLooseLeaderLayer({
-    required LooseLayerLink link,
+    required this.link,
     RenderBox? child,
-  }) : assert(link != null),
-       _link = link,
-       super(child);
+  }):   super(child);
 
   /// The link object that connects this [RenderLooseLeaderLayer] with one or more
   /// [RenderLooseFollowerLayer]s.
   ///
   /// This property must not be null. The object must not be associated with
   /// another [RenderLooseLeaderLayer] that is also being painted.
-  LooseLayerLink get link => _link;
-  LooseLayerLink _link;
-  set link(LooseLayerLink value) {
-    assert(value != null);
-    if (_link == value)
-      return;
-    _link.leaderSize = null;
-    _link = value;
-    if (_previousLayoutSize != null) {
-      _link.leaderSize = _previousLayoutSize;
-    }
-    markNeedsPaint();
-  }
+  final LooseLayerLink link;
 
   @override
   bool get alwaysNeedsCompositing => true;
@@ -518,7 +501,7 @@ class RenderLooseFollowerLayer extends RenderProxyBox {
   ///
   /// The [link] and [offset] arguments must not be null.
   RenderLooseFollowerLayer({
-    required LooseLayerLink link,
+    required this.link,
     bool showWhenUnlinked = true,
     Offset offset = Offset.zero,
     Alignment leaderAnchor = Alignment.topLeft,
@@ -527,7 +510,6 @@ class RenderLooseFollowerLayer extends RenderProxyBox {
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
-       _link = link,
        _showWhenUnlinked = showWhenUnlinked,
        _offset = offset,
        _leaderAnchor = leaderAnchor,
@@ -536,15 +518,7 @@ class RenderLooseFollowerLayer extends RenderProxyBox {
 
   /// The link object that connects this [RenderFollowerLayer] with a
   /// [RenderLeaderLayer] earlier in the paint order.
-  LooseLayerLink get link => _link;
-  LooseLayerLink _link;
-  set link(LooseLayerLink value) {
-    assert(value != null);
-    if (_link == value)
-      return;
-    _link = value;
-    markNeedsPaint();
-  }
+  final LooseLayerLink link;
 
   /// Whether to show the render object's contents when there is no
   /// corresponding [RenderLooseLeaderLayer] with the same [link].
@@ -676,7 +650,7 @@ class RenderLooseFollowerLayer extends RenderProxyBox {
       ? this.offset
       : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
     assert(showWhenUnlinked != null);
-    if (layer == null) {
+    if (layer == null || layer?.link != link) {
       layer = LooseFollowerLayer(
         link: link,
         showWhenUnlinked: showWhenUnlinked,
@@ -684,8 +658,7 @@ class RenderLooseFollowerLayer extends RenderProxyBox {
         unlinkedOffset: offset,
       );
     } else {
-      layer
-        ?..link = link
+        layer!
         ..showWhenUnlinked = showWhenUnlinked
         ..linkedOffset = effectiveLinkedOffset
         ..unlinkedOffset = offset;
@@ -767,7 +740,7 @@ class CompositedTransformLooseTarget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderLooseLeaderLayer renderObject) {
-    renderObject.link = link;
+    assert(renderObject.link == link);
   }
 }
 
@@ -881,8 +854,8 @@ class CompositedTransformLooseFollower extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderLooseFollowerLayer renderObject) {
+    assert(renderObject.link == link);
     renderObject
-      ..link = link
       ..showWhenUnlinked = showWhenUnlinked
       ..offset = offset
       ..leaderAnchor = targetAnchor

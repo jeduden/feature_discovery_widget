@@ -502,6 +502,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
       background,
       CompositedTransformLooseFollower(
+          showWhenUnlinked: false,// we really dont want to display anything if our target is gone.
           link: link,
           targetAnchor: Alignment.center,
           followerAnchor: Alignment.topLeft,
