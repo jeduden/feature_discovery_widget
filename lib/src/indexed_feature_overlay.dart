@@ -38,6 +38,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
 
   @override
   void dispose() {
+    overlayKey.currentState?.dispose();
     super.dispose();
   }
 
@@ -45,6 +46,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
       GlobalKey<OverlayState> overlayKey, OverlayEntry entry, int tries) {
     if (tries > 0) {
       if (overlayKey.currentState != null) {
+        print("IndexFeatureOverlayState.tryInsertEntry: $tries tries left");
         overlayKey.currentState!.insert(entry);
       } else {
         WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -110,6 +112,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
+      ..add(StringProperty("key", widget.key?.toString()))
       ..add(StringProperty(
           "featureOverlayList", List.from(featureOverlayList).toString()))
       ..add(StringProperty("activeIndex", activeIndex.toString()));

@@ -4,6 +4,7 @@ import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'composite_transform_loose.dart';
 import 'feature_overlay_event.dart';
 
 /// Provides configuration to FeatureOverlays
@@ -30,7 +31,7 @@ class FeatureOverlayConfig extends InheritedWidget {
   /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
 
-  final LayerLink layerLink;
+  final LooseLayerLink layerLink;
 
   FeatureOverlayConfig({
     Key? key,

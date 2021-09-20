@@ -1,6 +1,11 @@
+
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'composite_transform_loose.dart';
 import 'feature_overlay_config.dart';
+
+
 
 /// Marks the [child] [Widget] witgh a [featureId].
 /// The [FeatureOverlay] with the corresponding [featureId] will use that to overlay this [child].
@@ -26,7 +31,7 @@ class FeatureOverlayTarget extends StatelessWidget {
     final config = FeatureOverlayConfig.whenPresentOf(context);
     final wrapperKey = ValueKey("wrap"); // does this improve perf?
     if (featureIds.contains(config?.activeFeatureId ?? null)) {
-      return CompositedTransformTarget(
+      return CompositedTransformLooseTarget(
         key: wrapperKey,
         link: config!.layerLink,
         child: child,

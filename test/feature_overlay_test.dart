@@ -43,7 +43,7 @@ void main() {
       await tester.pumpWidget(MinimalTestWrapper(
           child: FeatureOverlayConfig(
               enablePulsingAnimation: false,
-              layerLink: LayerLink(),
+              layerLink: LooseLayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
               child: FeatureOverlay(
@@ -63,7 +63,7 @@ void main() {
           screenSize: screenSize,
           child: FeatureOverlayConfig(
               enablePulsingAnimation: false,
-              layerLink: LayerLink(),
+              layerLink: LooseLayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
               openDuration: Duration(milliseconds: 2000),
@@ -98,7 +98,7 @@ void main() {
           screenSize: screenSize,
           child: FeatureOverlayConfig(
               enablePulsingAnimation: false,
-              layerLink: LayerLink(),
+              layerLink: LooseLayerLink(),
               activeFeatureId: null,
               eventsSink: eventController.sink,
               openDuration: Duration(milliseconds: 2000),
@@ -127,6 +127,36 @@ void main() {
           ]));
     });
 
+    testWidgets(
+        "when hitting tap target that doesnt follow, sink not notified.",
+        (WidgetTester tester) async {
+      const screenSize = const Size(3e2, 4e3);
+      await (TestWidgetsFlutterBinding.ensureInitialized()
+              as TestWidgetsFlutterBinding)
+          .setSurfaceSize(screenSize);
+
+      await tester.pumpWidget(MinimalTestWrapper(
+          screenSize: screenSize,
+          child: FeatureOverlayConfig(
+              enablePulsingAnimation: false,
+              layerLink: LooseLayerLink(),
+              activeFeatureId: "myFeature",
+              eventsSink: eventController.sink,
+              child: FeatureOverlay(
+                  featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
+      await tester.pumpAndSettle();
+      events.clear();
+      await tester.tap(find.byIcon(Icons.ac_unit));
+      expect(
+          events,
+          orderedEquals([
+            FeatureOverlayEvent(
+                state: FeatureOverlayState.dismissing,
+                previousState: FeatureOverlayState.opened,
+                featureId: "myFeature")
+          ]));
+    });
+
     testWidgets("when hitting tap target: sink is notified.",
         (WidgetTester tester) async {
       const screenSize = const Size(3e2, 4e3);
@@ -138,11 +168,15 @@ void main() {
           screenSize: screenSize,
           child: FeatureOverlayConfig(
               enablePulsingAnimation: false,
-              layerLink: LayerLink(),
+              layerLink: LooseLayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
-              child: FeatureOverlay(
-                  featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)))));
+              child: Stack(children: [
+                FeatureOverlay(
+                    featureId: "myFeature", tapTarget: Icon(Icons.ac_unit)),
+                FeatureOverlayTarget(
+                    featureIds: {"myFeature"}, child: Container())
+              ]))));
       await tester.pumpAndSettle();
       events.clear();
       await tester.tap(find.byIcon(Icons.ac_unit));
@@ -175,17 +209,19 @@ void main() {
           screenSize: screenSize,
           child: FeatureOverlayConfig(
               enablePulsingAnimation: false,
-              layerLink: LayerLink(),
+              layerLink: LooseLayerLink(),
               activeFeatureId: "myFeature",
               eventsSink: eventController.sink,
               openDuration: Duration(milliseconds: 2000),
               completeDuration: Duration(milliseconds: 2000),
-              child: FeatureOverlay(
+              child: Stack(children: [
+                FeatureOverlayTarget(child: Container(),featureIds: {"myFeature"},),
+              FeatureOverlay(
                 featureId: "myFeature",
                 tapTarget: Icon(Icons.ac_unit),
                 onCompleted: mockCompleted,
                 onOpening: mockOpening,
-              ))));
+              )],))));
 
       await tester.pump(Duration(milliseconds: 100));
       verify(mockOpening.call());

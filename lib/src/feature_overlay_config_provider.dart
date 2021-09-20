@@ -4,6 +4,7 @@ import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'composite_transform_loose.dart';
 import 'feature_overlay_config.dart';
 import 'feature_overlay_event.dart';
 
@@ -82,7 +83,7 @@ class FeatureOverlayConfigProviderState
 
   @visibleForTesting
   String? activeFeatureId;
-  late LayerLink layerLink;
+  late LooseLayerLink layerLink;
 
   @visibleForTesting
   late StreamController<FeatureOverlayEvent> eventsController;
@@ -92,7 +93,7 @@ class FeatureOverlayConfigProviderState
 
   @override
   void initState() {
-    layerLink = LayerLink();
+    layerLink = LooseLayerLink();
     eventsController = StreamController.broadcast();
     eventsSink = eventsController.sink;
     activeFeatureId = widget.initialActiveId;

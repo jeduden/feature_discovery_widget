@@ -1,6 +1,6 @@
 name: feature_discovery_widget
 description: Feature Discovery Widget
-version: 0.0.8
+version: 0.0.10
 homepage: https://github.com/jeduden/feature_discovery_widget
 
 environment:
@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  vector_math: ^2.1.0
 
 dev_dependencies:
   flutter_test:

@@ -12,6 +12,7 @@ import 'package:feature_discovery_widget/src/content.dart';
 import 'package:feature_discovery_widget/src/center_about.dart';
 import 'package:feature_discovery_widget/src/feature_overlay_config.dart';
 
+import 'composite_transform_loose.dart';
 import 'feature_overlay_event.dart';
 
 /// Configures the contents and appearance of the feature overlay
@@ -279,13 +280,19 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   }
 
   void _dismiss() {
-    advanceState(
-        to: FeatureOverlayState.dismissing, activeFeature: _activeFeature);
+    if( _state != FeatureOverlayState.completing && _state != FeatureOverlayState.onCompleted) {
+      // don't dismiss during completing + onCompleted
+      advanceState(
+          to: FeatureOverlayState.dismissing, activeFeature: _activeFeature);
+    }
   }
 
   void _complete() {
-    advanceState(
-        to: FeatureOverlayState.completing, activeFeature: _activeFeature);
+    if( _state != FeatureOverlayState.dismissing) {
+      // don't complete anymore when dismissing
+      advanceState(
+          to: FeatureOverlayState.completing, activeFeature: _activeFeature);
+    }
   }
 
   bool _isCloseToTopOrBottom(Offset position) =>
@@ -488,7 +495,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
 
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
       if (widget.barrierDismissible) background,
-      CompositedTransformFollower(
+      CompositedTransformLooseFollower(
           link: link,
           targetAnchor: Alignment.center,
           followerAnchor: Alignment.topLeft,
