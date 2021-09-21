@@ -139,8 +139,6 @@ class FeatureOverlayConfigProviderState
       dismissibleDefault: widget.dismissibleDefault,
       screenOverlayColor: widget.screenOverlayColor,
     );
-    print(
-        "FeatureOverlayConfigProviderState.build $this => $config activeFeatureId:$activeFeatureId");
     return config;
   }
 
