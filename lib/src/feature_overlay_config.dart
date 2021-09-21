@@ -34,6 +34,9 @@ class FeatureOverlayConfig extends InheritedWidget {
   /// Default value for dismissible
   final bool dismissibleDefault;
 
+  /// Default value for screen overlay color
+  final Color screenOverlayColor;
+
   final LooseLayerLink layerLink;
 
   FeatureOverlayConfig({
@@ -44,6 +47,7 @@ class FeatureOverlayConfig extends InheritedWidget {
     required this.eventsSink,
     this.activeFeatureId,
     this.dismissibleDefault = true,
+    this.screenOverlayColor = Colors.transparent,
     this.openDuration: const Duration(milliseconds: 500),
     this.pulseDuration: const Duration(milliseconds: 1000),
     this.completeDuration: const Duration(milliseconds: 250),
@@ -63,6 +67,7 @@ class FeatureOverlayConfig extends InheritedWidget {
         pulseDuration != oldWidget.pulseDuration ||
         completeDuration != oldWidget.completeDuration ||
         dismissibleDefault != oldWidget.dismissibleDefault ||
+        screenOverlayColor != oldWidget.screenOverlayColor ||
         dismissDuration != oldWidget.dismissDuration;
     print("FeatureOverlayConfig.updateShouldNotify returns $result");
     return result;
