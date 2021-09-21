@@ -1,6 +1,6 @@
 name: feature_discovery_widget
 description: Feature Discovery Widget
-version: 0.0.23
+version: 0.0.24
 homepage: https://github.com/jeduden/feature_discovery_widget
 
 environment:
