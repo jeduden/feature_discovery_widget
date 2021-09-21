@@ -84,6 +84,9 @@ class FeatureOverlay extends StatefulWidget {
   /// The default value for [dismissible] will be taking for [FeatureOverlayConfig.dismissableDefault]
   final bool? dismissible;
 
+  /// Color of the screen overlay by default [Colors.transparent]
+  final Color screenOverlayColor;
+
   /// Called after the feature finished completing state.
   /// It moves to closed state only after this handler returns.
   final Future<void> Function()? onCompleted;
@@ -111,6 +114,7 @@ class FeatureOverlay extends StatefulWidget {
     Key? key,
     required this.featureId,
     this.backgroundColor,
+    this.screenOverlayColor = Colors.transparent,
     this.targetColor = Colors.white,
     this.textColor = Colors.white,
     this.title,
@@ -241,8 +245,9 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           break;
         case FeatureOverlayState.closed:
           //assert(to == null || to == FeatureOverlayState.closed);
-          if(to != null && to != FeatureOverlayState.closed) {
-              print("_DescribedFeatureOverlayState: is this a bug: transition from closed -> $to for feature: \"${widget.featureId}\" active feature:\"$_activeFeature\"");
+          if (to != null && to != FeatureOverlayState.closed) {
+            print(
+                "_DescribedFeatureOverlayState: is this a bug: transition from closed -> $to for feature: \"${widget.featureId}\" active feature:\"$_activeFeature\"");
           }
           if (_activeFeature == widget.featureId) {
             _setOverlayState(FeatureOverlayState.onOpening);
@@ -280,13 +285,15 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   }
 
   void _dismiss() {
-    final dismissible = widget.dismissible ?? FeatureOverlayConfig.of(context).dismissibleDefault;
-    if(!dismissible) {
+    final dismissible = widget.dismissible ??
+        FeatureOverlayConfig.of(context).dismissibleDefault;
+    if (!dismissible) {
       print("Ignore dismiss.");
       return;
     }
 
-    if( _state != FeatureOverlayState.completing && _state != FeatureOverlayState.onCompleted) {
+    if (_state != FeatureOverlayState.completing &&
+        _state != FeatureOverlayState.onCompleted) {
       // don't dismiss during completing + onCompleted
       advanceState(
           to: FeatureOverlayState.dismissing, activeFeature: _activeFeature);
@@ -294,7 +301,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   }
 
   void _complete() {
-    if( _state != FeatureOverlayState.dismissing) {
+    if (_state != FeatureOverlayState.dismissing) {
       // don't complete anymore when dismissing
       advanceState(
           to: FeatureOverlayState.completing, activeFeature: _activeFeature);
@@ -440,9 +447,10 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     // otherwise a top on the target is not detected,
     // and the background is hit instead.
 
-    final normRadius = _TapTarget.calcNormalRadius(baseRadius: widget.tapTargetBaseRadius,radiusOpeningExpansion: widget.tapTargetOpeningExpansion);
-    final tapTargetRadiusOffset =
-        Offset(normRadius, normRadius) * sqrt(2);
+    final normRadius = _TapTarget.calcNormalRadius(
+        baseRadius: widget.tapTargetBaseRadius,
+        radiusOpeningExpansion: widget.tapTargetOpeningExpansion);
+    final tapTargetRadiusOffset = Offset(normRadius, normRadius) * sqrt(2);
 
     final anchor = tapTargetRadiusOffset; //tapTargetRadiusOffset;
 
@@ -476,33 +484,31 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     }
 
     final tapTarget = _TapTarget(
-                state: _state,
-                transitionProgress: _animationController.value,
-                anchor: anchor,
-                color: widget.targetColor,
-                onPressed: _complete,
-                child: widget.tapTarget,
-                baseRadius: widget.tapTargetBaseRadius,
-                radiusOpeningExpansion: widget.tapTargetOpeningExpansion,
-                radiusOpenedExpansion: widget.tapTargetOpenedExpansion,
-              );
+      state: _state,
+      transitionProgress: _animationController.value,
+      anchor: anchor,
+      color: widget.targetColor,
+      onPressed: _complete,
+      child: widget.tapTarget,
+      baseRadius: widget.tapTargetBaseRadius,
+      radiusOpeningExpansion: widget.tapTargetOpeningExpansion,
+      radiusOpenedExpansion: widget.tapTargetOpenedExpansion,
+    );
 
     final contentPosition = Offset(
       dx,
-      anchor.dy +
-          contentOffsetMultiplier * tapTarget.maxRadius,
-    );
-
-    Widget background = GestureDetector(
-      onTap: () => _dismiss(),
-      // According to the spec, the user should be able to dismiss by swiping.
-      onPanUpdate: (_) => _dismiss(),
+      anchor.dy + contentOffsetMultiplier * tapTarget.maxRadius,
     );
 
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
-      background,
+      _ScreenOverlay(
+          color: widget.screenOverlayColor,
+          state: _state,
+          transitionProgress: _animationController.value,
+          onTap: _dismiss),
       CompositedTransformLooseFollower(
-          showWhenUnlinked: false,// we really dont want to display anything if our target is gone.
+          showWhenUnlinked:
+              false, // we really dont want to display anything if our target is gone.
           link: link,
           targetAnchor: Alignment.center,
           followerAnchor: Alignment.topLeft,
@@ -580,6 +586,61 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     } else {
       return Container(key: key);
     }
+  }
+}
+
+class _ScreenOverlay extends StatelessWidget {
+  final FeatureOverlayState state;
+  final double transitionProgress;
+  final Color color;
+  final FutureOr<void> Function() onTap;
+
+  const _ScreenOverlay({
+    Key? key,
+    required this.color,
+    required this.state,
+    required this.transitionProgress,
+    required this.onTap,
+  }) : super(key: key);
+
+  double get opacity {
+    switch (state) {
+      case FeatureOverlayState.opening:
+        final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut)
+            .transform(transitionProgress);
+        return adjustedPercent;
+
+      case FeatureOverlayState.completing:
+        final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut)
+            .transform(transitionProgress);
+
+        return (1 - adjustedPercent);
+      case FeatureOverlayState.dismissing:
+        final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut)
+            .transform(transitionProgress);
+        return (1 - adjustedPercent);
+      case FeatureOverlayState.opened:
+        return 1.0;
+      case FeatureOverlayState.onOpening:
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.closed:
+        return 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (state == FeatureOverlayState.closed) {
+      return Container();
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      onPanUpdate: (_) async {
+        await onTap();
+      },
+      child: Opacity(opacity: opacity, child: Container(color: color)),
+    );
   }
 }
 
