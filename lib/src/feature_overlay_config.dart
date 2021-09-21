@@ -56,8 +56,6 @@ class FeatureOverlayConfig extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant FeatureOverlayConfig oldWidget) {
-    print(
-        "FeatureOverlayConfig.updateShouldNotify activeFeatureId:$activeFeatureId oldWidget.activeFeatureId ${oldWidget.activeFeatureId}");
     final result = 
         enablePulsingAnimation != oldWidget.enablePulsingAnimation ||
         layerLink != oldWidget.layerLink ||
@@ -69,7 +67,6 @@ class FeatureOverlayConfig extends InheritedWidget {
         dismissibleDefault != oldWidget.dismissibleDefault ||
         screenOverlayColor != oldWidget.screenOverlayColor ||
         dismissDuration != oldWidget.dismissDuration;
-    print("FeatureOverlayConfig.updateShouldNotify returns $result");
     return result;
   }
 

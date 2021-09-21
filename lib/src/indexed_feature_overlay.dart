@@ -65,10 +65,7 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
 
   @override
   void didChangeDependencies() {
-    print("IndexFeatureOverlayState.didChangeDependencies");
     config = FeatureOverlayConfig.of(context);
-
-    print("IndexFeatureOverlayState.didChangeDependencies: activeIndex $activeIndex");
 
     FeatureOverlay? activeFeatureOverlayFromThis;
     if (activeIndex >= 0) {
@@ -90,15 +87,13 @@ class IndexFeatureOverlayState extends State<IndexedFeatureOverlay> {
       }
     }
     else {
-      print("IndexFeatureOverlayState.didChangeDependencies: activeFeatureOverlayFromThis $activeFeatureOverlayFromThis did not change.");
-     
+      
     }
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("IndexFeatureOverlayState.build");
     return Stack(children: <Widget>[
       widget.child,
       Overlay(

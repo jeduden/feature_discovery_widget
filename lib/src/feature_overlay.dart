@@ -186,8 +186,6 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   @override
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
-    print(
-        "_DescribedFeatureOverlayState.didChangeDependencies _activeFeature=$_activeFeature config.activeFeatureId=${config.activeFeatureId}");
     if (_activeFeature != config.activeFeatureId) {
       advanceState(activeFeature: config.activeFeatureId);
     }
