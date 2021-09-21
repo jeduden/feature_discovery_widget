@@ -142,6 +142,8 @@ class _MyHomePageState extends State<MyHomePage> {
             body: IndexedFeatureOverlay(
                 featureOverlays: {
                   FeatureOverlay(
+                    openDuration: Duration(milliseconds: 5000),
+                    backgroundBlur: 4,
                     backgroundOpacity: 0.3,
                     featureId: CounterFeatureId,
                     title: Text(
