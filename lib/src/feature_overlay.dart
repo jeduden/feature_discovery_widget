@@ -114,6 +114,9 @@ class FeatureOverlay extends StatefulWidget {
   /// Tap target pulsing expansion when opened
   double? tapTargetOpenedExpansion;
 
+  /// Open duration if not specified. uses configs value
+  Duration? openDuration;
+
   FeatureOverlay({
     Key? key,
     required this.featureId,
@@ -136,6 +139,7 @@ class FeatureOverlay extends StatefulWidget {
     this.tapTargetBaseRadius,
     this.tapTargetOpeningExpansion,
     this.tapTargetOpenedExpansion,
+    this.openDuration,
   }) : super(key: key);
 
   @override
@@ -215,7 +219,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
         case FeatureOverlayState.onOpening:
           assert(to == null);
           _setOverlayState(FeatureOverlayState.opening);
-          _animationController.duration = config.openDuration;
+          _animationController.duration = widget.openDuration?? config.openDuration;
           _animationController.forward(from: 0);
           break;
         case FeatureOverlayState.opening:
