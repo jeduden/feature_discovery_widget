@@ -143,7 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureOverlays: {
                   FeatureOverlay(
                     openDuration: Duration(milliseconds: 5000),
-                    backgroundBlur: 4,
+                    backgroundBlur: 10,
+                    backgroundMinBlur: 3,
                     backgroundOpacity: 0.3,
                     featureId: CounterFeatureId,
                     title: Text(

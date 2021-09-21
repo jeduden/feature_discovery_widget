@@ -32,6 +32,10 @@ class FeatureOverlay extends StatefulWidget {
   /// The amount blur on the background. defaults to 0
   final double? backgroundBlur;
 
+  /// The minimum amount of blur on the background. defaults to 0
+  /// During opening and closing the animation will animate from/to this seting.
+  final double? backgroundMinBlur;
+
   /// The opacity of the large circle, where the text sits on.
   /// If null, defaults to 0.96.
   final double backgroundOpacity;
@@ -133,6 +137,7 @@ class FeatureOverlay extends StatefulWidget {
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
     this.backgroundBlur,
+    this.backgroundMinBlur,
     this.dismissible,
     this.pulseBaseRadius,
     this.pulseRadiusExpansion,
@@ -546,6 +551,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                             color: widget.backgroundColor ??
                                 Theme.of(context).primaryColor,
                             defaultBlur: widget.backgroundBlur ?? 0,
+                            defaultMinBlur: widget.backgroundMinBlur??0,
                             defaultOpacity: widget.backgroundOpacity,
                             state: _state,
                             overflowMode: widget.overflowMode,
@@ -657,6 +663,7 @@ class _Background extends StatelessWidget {
   final OverflowMode overflowMode;
   final double defaultOpacity;
   final double defaultBlur;
+  final double defaultMinBlur;
   final FutureOr<void> Function() onTap;
 
   const _Background({
@@ -667,6 +674,7 @@ class _Background extends StatelessWidget {
     required this.overflowMode,
     required this.defaultOpacity,
     this.defaultBlur = 3,
+    this.defaultMinBlur = 3,
     required this.onTap,
   }) : super(key: key);
 
@@ -695,14 +703,16 @@ class _Background extends StatelessWidget {
     }
   }
 
+  Tween<double> get blurTween => Tween(begin:defaultMinBlur, end: defaultBlur);
+
   double get blur {
     switch (state) {
       case FeatureOverlayState.opening:
-        return defaultBlur * transitionProgress;
+        return blurTween.transform(transitionProgress);
       case FeatureOverlayState.completing:
-        return defaultBlur * (1 - transitionProgress);
+        return blurTween.transform(1 - transitionProgress);
       case FeatureOverlayState.dismissing:
-        return defaultBlur * (1 - transitionProgress);
+        return blurTween.transform(1 - transitionProgress);
       case FeatureOverlayState.opened:
         return defaultBlur;
       case FeatureOverlayState.onOpening:
