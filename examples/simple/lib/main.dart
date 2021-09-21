@@ -132,6 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
             tapTargetOpenedExpansion: 50,
             pulseBaseRadius: 50+20,
             pulseRadiusExpansion: 50,
+            screenOverlayColor: Colors.black38,
           ),
         },
         child: Scaffold(
