@@ -164,7 +164,6 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   late AnimationController _animationController;
 
   FeatureOverlayConfig get config {
-    print("_DescribedFeatureOverlayState.config");
     return FeatureOverlayConfig.of(context);
   }
 
@@ -724,7 +723,7 @@ class _Background extends StatelessWidget {
     Widget result = LayoutBuilder(
         builder: (context, constraints) => ClipOval(
               child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                  filter: ImageFilter.blur(sigmaX: blur.roundToDouble(), sigmaY: blur.roundToDouble()),
                   child: Container(
                     // The size is controlled in BackgroundContentLayoutDelegate.
                     width: constraints.biggest.width,
