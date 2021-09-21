@@ -48,6 +48,9 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
   /// Default value for dismissible
   final bool dismissibleDefault;
 
+  /// Default screen overlay color
+  final Color screenOverlayColor;
+
   const FeatureOverlayConfigProvider(
       {Key? key,
       required this.child,
@@ -55,6 +58,7 @@ class FeatureOverlayConfigProvider extends StatefulWidget {
       this.initialActiveId,
       this.enablePulsingAnimation = true,
       this.dismissibleDefault = true,
+      this.screenOverlayColor = Colors.transparent,
       this.openDuration = const Duration(milliseconds: 250),
       this.pulseDuration = const Duration(milliseconds: 1000),
       this.completeDuration = const Duration(milliseconds: 400),
@@ -133,6 +137,7 @@ class FeatureOverlayConfigProviderState
       dismissDuration: widget.dismissDuration,
       pulseDuration: widget.pulseDuration,
       dismissibleDefault: widget.dismissibleDefault,
+      screenOverlayColor: widget.screenOverlayColor,
     );
     print(
         "FeatureOverlayConfigProviderState.build $this => $config activeFeatureId:$activeFeatureId");

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:feature_discovery_widget/feature_discovery_widget.dart';
 import 'package:flutter/animation.dart';
@@ -27,6 +28,9 @@ class FeatureOverlay extends StatefulWidget {
   /// The color of the large circle, where the text sits on.
   /// If null, defaults to [ThemeData.primaryColor].
   final Color? backgroundColor;
+
+  /// The amount blur on the background. defaults to 0
+  final double? backgroundBlur;
 
   /// The opacity of the large circle, where the text sits on.
   /// If null, defaults to 0.96.
@@ -85,7 +89,7 @@ class FeatureOverlay extends StatefulWidget {
   final bool? dismissible;
 
   /// Color of the screen overlay by default [Colors.transparent]
-  final Color screenOverlayColor;
+  final Color? screenOverlayColor;
 
   /// Called after the feature finished completing state.
   /// It moves to closed state only after this handler returns.
@@ -114,7 +118,7 @@ class FeatureOverlay extends StatefulWidget {
     Key? key,
     required this.featureId,
     this.backgroundColor,
-    this.screenOverlayColor = Colors.transparent,
+    this.screenOverlayColor,
     this.targetColor = Colors.white,
     this.textColor = Colors.white,
     this.title,
@@ -125,6 +129,7 @@ class FeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentLocation.trivial,
     this.overflowMode = OverflowMode.ignore,
     this.backgroundOpacity = kDefaultBackgroundOpacity,
+    this.backgroundBlur,
     this.dismissible,
     this.pulseBaseRadius,
     this.pulseRadiusExpansion,
@@ -502,7 +507,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
 
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
       _ScreenOverlay(
-          color: widget.screenOverlayColor,
+          color: widget.screenOverlayColor ?? config.screenOverlayColor,
           state: _state,
           transitionProgress: _animationController.value,
           onTap: _dismiss),
@@ -539,6 +544,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                             transitionProgress: _animationController.value,
                             color: widget.backgroundColor ??
                                 Theme.of(context).primaryColor,
+                            defaultBlur: widget.backgroundBlur ?? 0,
                             defaultOpacity: widget.backgroundOpacity,
                             state: _state,
                             overflowMode: widget.overflowMode,
@@ -650,6 +656,7 @@ class _Background extends StatelessWidget {
   final Color color;
   final OverflowMode overflowMode;
   final double defaultOpacity;
+  final double defaultBlur;
   final FutureOr<void> Function() onTap;
 
   const _Background({
@@ -659,6 +666,7 @@ class _Background extends StatelessWidget {
     required this.transitionProgress,
     required this.overflowMode,
     required this.defaultOpacity,
+    this.defaultBlur = 3,
     required this.onTap,
   }) : super(key: key);
 
@@ -687,6 +695,23 @@ class _Background extends StatelessWidget {
     }
   }
 
+  double get blur {
+    switch (state) {
+      case FeatureOverlayState.opening:
+        return defaultBlur * transitionProgress;
+      case FeatureOverlayState.completing:
+        return defaultBlur * (1 - transitionProgress);
+      case FeatureOverlayState.dismissing:
+        return defaultBlur * (1 - transitionProgress);
+      case FeatureOverlayState.opened:
+        return defaultBlur;
+      case FeatureOverlayState.onOpening:
+      case FeatureOverlayState.onCompleted:
+      case FeatureOverlayState.closed:
+        return 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (state == FeatureOverlayState.closed) {
@@ -694,14 +719,19 @@ class _Background extends StatelessWidget {
     }
 
     Widget result = LayoutBuilder(
-      builder: (context, constraints) => Container(
-        // The size is controlled in BackgroundContentLayoutDelegate.
-        width: constraints.biggest.width,
-        height: constraints.biggest.height,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle, color: color.withOpacity(opacity)),
-      ),
-    );
+        builder: (context, constraints) => ClipOval(
+              child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                  child: Container(
+                    // The size is controlled in BackgroundContentLayoutDelegate.
+                    width: constraints.biggest.width,
+                    height: constraints.biggest.height,
+                    //child: Text("bla", textScaleFactor: 3,),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color.withOpacity(opacity)),
+                  )),
+            ));
 
     result = GestureDetector(
       onTap: onTap,

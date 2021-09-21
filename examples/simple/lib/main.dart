@@ -142,6 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
             body: IndexedFeatureOverlay(
                 featureOverlays: {
                   FeatureOverlay(
+                    backgroundOpacity: 0.3,
                     featureId: CounterFeatureId,
                     title: Text(
                         "This is the counter. Longer Line ! Longer and Longer"),
@@ -169,7 +170,71 @@ class _MyHomePageState extends State<MyHomePage> {
                             final featureTourState = FeatureTour.of(context);
                             await featureTourState.resetTour();
                           },
-                          child: Text("Restart tutorial"))
+                          child: Text("Restart tutorial")),
+                          Spacer(flex: 1,),
+                      Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),
+                      Spacer(flex: 1,),
+                      Row(children: [Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      )]),
+                      Spacer(flex: 1,),
+                      Spacer(flex: 1,),
+                      Spacer(flex: 1,),
+                      Spacer(flex: 1,),
+                      Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),
+                      Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),Text(
+                        'More Text'
+                      ),
                     ],
                   ),
                 )),
