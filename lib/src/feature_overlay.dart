@@ -507,8 +507,8 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
 
     var contentWidth = min(_screenSize.width, _screenSize.height);
     if(contentLocation == ContentLocation.center) {
-      contentWidth -= leaderSize.width;
-      contentWidth -= _screenSize.width/2 - (leaderOffset.dx - _screenSize.width/2).abs();
+      contentWidth -= leaderSize.width/2;
+      contentWidth -= _screenSize.width/2 - (leaderCenterOffset.dx - _screenSize.width/2).abs();
     }
 
     var dx = contentCenterPosition.dx - contentWidth;
@@ -516,6 +516,9 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
       dx = _screenSize.width - contentWidth + contentCenterAnchorOffset.dx;
     } else if (dx + contentCenterAnchorOffset.dx < 0) {
       dx = -contentCenterAnchorOffset.dx;
+      if(dx>0) {
+         dx += leaderSize.width;
+      }
     }
 
     final tapTarget = _TapTarget(

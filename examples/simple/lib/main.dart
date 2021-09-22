@@ -15,6 +15,8 @@ const keyId = "completedFeatures";
 const IncrementFeatureId = "Increment";
 const CounterFeatureId = "Counter";
 const SomeText = "SomeText";
+const SomeTextLeft = "SomeTextLeft";
+const SomeTextRight = "SomeTextRight";
 const HomePortal = "HomePortal";
 const providerKey = GlobalObjectKey("provider");
 
@@ -83,7 +85,14 @@ class MyApp extends StatelessWidget {
                     // methods.
                     child:
                         MyHomePage(title: 'Simple Feature Discovery Example'),
-                    featureIds: [IncrementFeatureId, IncrementFeatureId, CounterFeatureId, SomeText],
+                    featureIds: [
+                      IncrementFeatureId,
+                      IncrementFeatureId,
+                      CounterFeatureId,
+                      SomeText,
+                      SomeTextLeft,
+                      SomeTextRight
+                    ],
                   )),
         ));
   }
@@ -131,13 +140,35 @@ class _MyHomePageState extends State<MyHomePage> {
             tapTargetBaseRadius: 50,
             tapTargetOpeningExpansion: 20,
             tapTargetOpenedExpansion: 50,
-            pulseBaseRadius: 50+20,
+            pulseBaseRadius: 50 + 20,
             pulseRadiusExpansion: 50,
             screenOverlayColor: Colors.black38,
           ),
           FeatureOverlay(
             featureId: SomeText,
             title: Text("Increment counter! With a very long title !"),
+            description: Text(
+                "The appearance of this overlay was delayed by 2 seconds in onOpening.\n"
+                "After the completion of this step, a delay of 3 seconds was configured in onCompleted.\n"
+                "Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
+            contentLocation: ContentLocation.center,
+            overflowMode: OverflowMode.extendBackground,
+            tapTarget: Icon(Icons.cabin),
+          ),
+          FeatureOverlay(
+            featureId: SomeTextLeft,
+            title: Text("<---- Explain that"),
+            description: Text(
+                "The appearance of this overlay was delayed by 2 seconds in onOpening.\n"
+                "After the completion of this step, a delay of 3 seconds was configured in onCompleted.\n"
+                "Tapping it increases the counter. Very Very Very Long Line \nTry to tap"),
+            contentLocation: ContentLocation.center,
+            overflowMode: OverflowMode.extendBackground,
+            tapTarget: Icon(Icons.cabin),
+          ),
+          FeatureOverlay(
+            featureId: SomeTextRight,
+            title: Text("Explain that ---->"),
             description: Text(
                 "The appearance of this overlay was delayed by 2 seconds in onOpening.\n"
                 "After the completion of this step, a delay of 3 seconds was configured in onCompleted.\n"
@@ -186,71 +217,55 @@ class _MyHomePageState extends State<MyHomePage> {
                             await featureTourState.resetTour();
                           },
                           child: Text("Restart tutorial")),
-                          Spacer(flex: 1,),
-                      Text(
-                        'More Text'
+                      Spacer(
+                        flex: 1,
                       ),
-                      Text(
-                        'More Text'
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Spacer(
+                        flex: 1,
                       ),
-                      Text(
-                        'More Text'
+                      Row(children: [
+                        FeatureOverlayTarget(
+                            featureIds: {SomeTextLeft},
+                            child: Text('More Text')),
+                        Text('More Text'),
+                        Text('More Text'),
+                        Text('More Text'),
+                        Text('More Text'),
+                        FeatureOverlayTarget(
+                            featureIds: {SomeTextRight},
+                            child: Text('More Text'))
+                      ]),
+                      Spacer(
+                        flex: 1,
                       ),
-                      Text(
-                        'More Text'
+                      Spacer(
+                        flex: 1,
                       ),
-                      Text(
-                        'More Text'
+                      Spacer(
+                        flex: 1,
                       ),
-                      Spacer(flex: 1,),
-                      Row(children: [Text(
-                        'More Text'
+                      Spacer(
+                        flex: 1,
                       ),
-                      Text(
-                        'More Text'
-                      ),
-                      Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      )]),
-                      Spacer(flex: 1,),
-                      Spacer(flex: 1,),
-                      Spacer(flex: 1,),
-                      Spacer(flex: 1,),
                       FeatureOverlayTarget(
-                          featureIds: {SomeText},child:Text(
-                        'More Text'
-                      )),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),
-                      Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),Text(
-                        'More Text'
-                      ),
+                          featureIds: {SomeText}, child: Text('More Text')),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
+                      Text('More Text'),
                     ],
                   ),
                 )),
