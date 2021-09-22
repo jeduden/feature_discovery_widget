@@ -47,8 +47,10 @@ enum FeatureOverlayState {
 ///    Make sure to test this for every overlay because the trivial positioning can fail sometimes.
 ///  * [above], which will layout the content above the tap target.
 ///  * [below], which will layout the content below the tap target.
+///  * [center], which will layout the content next to the tap target.
 enum ContentLocation {
   above,
   below,
   trivial,
+  center, 
 }

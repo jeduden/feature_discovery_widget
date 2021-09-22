@@ -22,6 +22,9 @@ import 'feature_overlay_event.dart';
 class FeatureOverlay extends StatefulWidget {
   static const double kDefaultBackgroundOpacity = 0.96;
 
+  @visibleForTesting
+  final TickerProvider? externalVsync;
+
   /// This id must be unique among all the [FeatureOverlay] widgets.
   final String featureId;
 
@@ -145,11 +148,12 @@ class FeatureOverlay extends StatefulWidget {
     this.tapTargetOpeningExpansion,
     this.tapTargetOpenedExpansion,
     this.openDuration,
+    this.externalVsync
   }) : super(key: key);
 
   @override
-  _FeatureOverlayState createState() {
-    final state = _FeatureOverlayState();
+  FeatureOverlayWidgetState createState() {
+    final state = FeatureOverlayWidgetState();
     return state;
   }
 
@@ -160,7 +164,8 @@ class FeatureOverlay extends StatefulWidget {
   }
 }
 
-class _FeatureOverlayState extends State<FeatureOverlay>
+@visibleForTesting
+class FeatureOverlayWidgetState extends State<FeatureOverlay>
     with SingleTickerProviderStateMixin {
   late Size _screenSize;
 
@@ -176,7 +181,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   void initState() {
     _state = FeatureOverlayState.closed;
     _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 1))
+        AnimationController(vsync: widget.externalVsync ?? this, duration: Duration(seconds: 1))
           ..addListener(() {
             setState(() {});
           })
@@ -219,10 +224,15 @@ class _FeatureOverlayState extends State<FeatureOverlay>
           .stop(); // we don't want any completion notifications. anymore
       switch (_state) {
         case FeatureOverlayState.onOpening:
-          assert(to == null);
-          _setOverlayState(FeatureOverlayState.opening);
-          _animationController.duration = widget.openDuration?? config.openDuration;
-          _animationController.forward(from: 0);
+          assert(to == null || to == FeatureOverlayState.dismissing);
+          if(to == null) {
+            _setOverlayState(FeatureOverlayState.opening);
+            _animationController.duration = widget.openDuration?? config.openDuration;
+            _animationController.forward(from: 0);
+          }
+          else {
+            print("Ignore completing/dimissing during opening");
+          }
           break;
         case FeatureOverlayState.opening:
           assert(to == null || to == FeatureOverlayState.dismissing);
@@ -268,6 +278,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
             });
           }
           break;
+        opened:
         case FeatureOverlayState.opened:
           if (to == FeatureOverlayState.completing) {
             _animationController.duration = config.completeDuration;
@@ -354,6 +365,13 @@ class _FeatureOverlayState extends State<FeatureOverlay>
                   width / 2.0 +
                   (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
               anchor.dy - (width / 2.0) + 80.0);
+          break;
+        case ContentLocation.center:
+          endingBackgroundPosition = Offset(
+              anchor.dx -
+                  width / 2.0 +
+                  (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy);
           break;
         case ContentLocation.below:
           endingBackgroundPosition = Offset(
@@ -447,6 +465,8 @@ class _FeatureOverlayState extends State<FeatureOverlay>
 
     if (orientation == ContentLocation.above) return -1;
 
+    if (orientation == ContentLocation.center) return -0.5;
+
     return 1;
   }
 
@@ -485,7 +505,11 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     final contentCenterPosition =
         _contentCenterPosition(-contentCenterAnchorOffset)!;
 
-    final contentWidth = min(_screenSize.width, _screenSize.height);
+    var contentWidth = min(_screenSize.width, _screenSize.height);
+    if(contentLocation == ContentLocation.center) {
+      contentWidth -= leaderSize.width;
+      contentWidth -= _screenSize.width/2 - (leaderOffset.dx - _screenSize.width/2).abs();
+    }
 
     var dx = contentCenterPosition.dx - contentWidth;
     if (contentCenterAnchorOffset.dx + dx + contentWidth > _screenSize.width) {
@@ -512,7 +536,7 @@ class _FeatureOverlayState extends State<FeatureOverlay>
     );
 
     return Stack(fit: StackFit.expand, clipBehavior: Clip.none, children: [
-      _ScreenOverlay(
+      ScreenOverlay(
           color: widget.screenOverlayColor ?? config.screenOverlayColor,
           state: _state,
           transitionProgress: _animationController.value,
@@ -601,13 +625,14 @@ class _FeatureOverlayState extends State<FeatureOverlay>
   }
 }
 
-class _ScreenOverlay extends StatelessWidget {
+@visibleForTesting
+class ScreenOverlay extends StatelessWidget {
   final FeatureOverlayState state;
   final double transitionProgress;
   final Color color;
   final FutureOr<void> Function() onTap;
 
-  const _ScreenOverlay({
+  const ScreenOverlay({
     Key? key,
     required this.color,
     required this.state,
