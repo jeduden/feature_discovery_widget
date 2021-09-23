@@ -124,32 +124,32 @@ class FeatureOverlay extends StatefulWidget {
   /// Open duration if not specified. uses configs value
   Duration? openDuration;
 
-  FeatureOverlay({
-    Key? key,
-    required this.featureId,
-    this.backgroundColor,
-    this.screenOverlayColor,
-    this.targetColor = Colors.white,
-    this.textColor = Colors.white,
-    this.title,
-    this.description,
-    required this.tapTarget,
-    this.onCompleted,
-    this.onOpening,
-    this.contentLocation = ContentLocation.trivial,
-    this.overflowMode = OverflowMode.ignore,
-    this.backgroundOpacity = kDefaultBackgroundOpacity,
-    this.backgroundBlur,
-    this.backgroundMinBlur,
-    this.dismissible,
-    this.pulseBaseRadius,
-    this.pulseRadiusExpansion,
-    this.tapTargetBaseRadius,
-    this.tapTargetOpeningExpansion,
-    this.tapTargetOpenedExpansion,
-    this.openDuration,
-    this.externalVsync
-  }) : super(key: key);
+  FeatureOverlay(
+      {Key? key,
+      required this.featureId,
+      this.backgroundColor,
+      this.screenOverlayColor,
+      this.targetColor = Colors.white,
+      this.textColor = Colors.white,
+      this.title,
+      this.description,
+      required this.tapTarget,
+      this.onCompleted,
+      this.onOpening,
+      this.contentLocation = ContentLocation.trivial,
+      this.overflowMode = OverflowMode.ignore,
+      this.backgroundOpacity = kDefaultBackgroundOpacity,
+      this.backgroundBlur,
+      this.backgroundMinBlur,
+      this.dismissible,
+      this.pulseBaseRadius,
+      this.pulseRadiusExpansion,
+      this.tapTargetBaseRadius,
+      this.tapTargetOpeningExpansion,
+      this.tapTargetOpenedExpansion,
+      this.openDuration,
+      this.externalVsync})
+      : super(key: key);
 
   @override
   FeatureOverlayWidgetState createState() {
@@ -180,16 +180,16 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
   @override
   void initState() {
     _state = FeatureOverlayState.closed;
-    _animationController =
-        AnimationController(vsync: widget.externalVsync ?? this, duration: Duration(seconds: 1))
-          ..addListener(() {
-            setState(() {});
-          })
-          ..addStatusListener((status) {
-            print("AnimationStatus: ${status.toString()}");
-            if (status == AnimationStatus.completed)
-              advanceState(activeFeature: _activeFeature);
-          });
+    _animationController = AnimationController(
+        vsync: widget.externalVsync ?? this, duration: Duration(seconds: 1))
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        print("AnimationStatus: ${status.toString()}");
+        if (status == AnimationStatus.completed)
+          advanceState(activeFeature: _activeFeature);
+      });
     super.initState();
   }
 
@@ -225,17 +225,19 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
       switch (_state) {
         case FeatureOverlayState.onOpening:
           assert(to == null || to == FeatureOverlayState.dismissing);
-          if(to == null) {
+          if (to == null) {
             _setOverlayState(FeatureOverlayState.opening);
-            _animationController.duration = widget.openDuration?? config.openDuration;
+            _animationController.duration =
+                widget.openDuration ?? config.openDuration;
             _animationController.forward(from: 0);
-          }
-          else {
+          } else {
             print("Ignore completing/dimissing during opening");
           }
           break;
         case FeatureOverlayState.opening:
-          assert(to == null || to == FeatureOverlayState.dismissing);
+          assert(to == null ||
+              to == FeatureOverlayState.dismissing ||
+              to == FeatureOverlayState.completing);
           if (_activeFeature != widget.featureId) {
             _setOverlayState(FeatureOverlayState.dismissing);
             _animationController.duration = config.dismissDuration;
@@ -506,9 +508,10 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
         _contentCenterPosition(-contentCenterAnchorOffset)!;
 
     var contentWidth = min(_screenSize.width, _screenSize.height);
-    if(contentLocation == ContentLocation.center) {
-      contentWidth -= leaderSize.width/2;
-      contentWidth -= _screenSize.width/2 - (leaderCenterOffset.dx - _screenSize.width/2).abs();
+    if (contentLocation == ContentLocation.center) {
+      contentWidth -= leaderSize.width / 2;
+      contentWidth -= _screenSize.width / 2 -
+          (leaderCenterOffset.dx - _screenSize.width / 2).abs();
     }
 
     var dx = contentCenterPosition.dx - contentWidth;
@@ -516,8 +519,8 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
       dx = _screenSize.width - contentWidth + contentCenterAnchorOffset.dx;
     } else if (dx + contentCenterAnchorOffset.dx < 0) {
       dx = -contentCenterAnchorOffset.dx;
-      if(dx>0) {
-         dx += leaderSize.width;
+      if (dx > 0  && contentLocation == ContentLocation.center) {
+        dx += leaderSize.width;
       }
     }
 
@@ -578,7 +581,7 @@ class FeatureOverlayWidgetState extends State<FeatureOverlay>
                             color: widget.backgroundColor ??
                                 Theme.of(context).primaryColor,
                             defaultBlur: widget.backgroundBlur ?? 0,
-                            defaultMinBlur: widget.backgroundMinBlur??0,
+                            defaultMinBlur: widget.backgroundMinBlur ?? 0,
                             defaultOpacity: widget.backgroundOpacity,
                             state: _state,
                             overflowMode: widget.overflowMode,
@@ -731,7 +734,7 @@ class _Background extends StatelessWidget {
     }
   }
 
-  Tween<double> get blurTween => Tween(begin:defaultMinBlur, end: defaultBlur);
+  Tween<double> get blurTween => Tween(begin: defaultMinBlur, end: defaultBlur);
 
   double get blur {
     switch (state) {
@@ -759,7 +762,9 @@ class _Background extends StatelessWidget {
     Widget result = LayoutBuilder(
         builder: (context, constraints) => ClipOval(
               child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: blur.roundToDouble(), sigmaY: blur.roundToDouble()),
+                  filter: ImageFilter.blur(
+                      sigmaX: blur.roundToDouble(),
+                      sigmaY: blur.roundToDouble()),
                   child: Container(
                     // The size is controlled in BackgroundContentLayoutDelegate.
                     width: constraints.biggest.width,

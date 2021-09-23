@@ -26,10 +26,13 @@ void main() {
     const titleHeight = 100.0;
     const descriptionHeight = 21.0;
     const tapTargetIconHeight = 33.0;
-    final builder =
-        (String expected, OverflowMode mode, ContentLocation contentLocation, Alignment alignTarget, Rect expectedContentRect) {
-      
-      testWidgets("$mode - $contentLocation - $alignTarget $expected", (WidgetTester tester) async {
+    final builder = (String expected,
+        OverflowMode mode,
+        ContentLocation contentLocation,
+        Alignment alignTarget,
+        Rect expectedContentRect) {
+      testWidgets("$mode - $contentLocation - $alignTarget $expected",
+          (WidgetTester tester) async {
         await (TestWidgetsFlutterBinding.ensureInitialized()
                 as TestWidgetsFlutterBinding)
             .setSurfaceSize(screenSize);
@@ -41,77 +44,82 @@ void main() {
           featureId: featureId,
           overflowMode: mode,
           contentLocation: contentLocation,
-          title: SizedBox(width: 100,height: titleHeight,),
-          description: SizedBox(width: 100,height: descriptionHeight,),
-          tapTarget: Icon(Icons.ac_unit_sharp,size:tapTargetIconHeight),
+          title: SizedBox(
+            width: 100,
+            height: titleHeight,
+          ),
+          description: SizedBox(
+            width: 100,
+            height: descriptionHeight,
+          ),
+          tapTarget: Icon(Icons.ac_unit_sharp, size: tapTargetIconHeight),
         );
-        await tester.pumpWidget(MinimalTestWrapper(screenSize: screenSize,
-                child: FeatureOverlayConfig(
-                  enablePulsingAnimation: false,
-                  layerLink: LooseLayerLink(),
-                  activeFeatureId: featureId,
-                  eventsSink: eventController.sink,
-                  openDuration: Duration(milliseconds: 10),
-                  child: IndexedFeatureOverlay(
-                      featureOverlays: {
-                        featureOverlay,
-                      },
-                      child: Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: Align(
-                            alignment: alignTarget,
-                            child: FeatureOverlayTarget(
-                                featureIds: {featureId},
-                                child: Icon(Icons.ac_unit)),
-                          ))),
-                )));
+        await tester.pumpWidget(MinimalTestWrapper(
+            screenSize: screenSize,
+            child: FeatureOverlayConfig(
+              enablePulsingAnimation: false,
+              layerLink: LooseLayerLink(),
+              activeFeatureId: featureId,
+              eventsSink: eventController.sink,
+              openDuration: Duration(milliseconds: 10),
+              child: IndexedFeatureOverlay(
+                  featureOverlays: {
+                    featureOverlay,
+                  },
+                  child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Align(
+                        alignment: alignTarget,
+                        child: FeatureOverlayTarget(
+                            featureIds: {featureId},
+                            child: Icon(Icons.ac_unit)),
+                      ))),
+            )));
         await tester.pumpAndSettle(Duration(milliseconds: 11));
 
         final actual = tester.getRect(find.byType(Content));
-        expect(actual.left, closeTo(expectedContentRect.left,0.1), reason:"left");
-        expect(actual.right, closeTo(expectedContentRect.right,0.1), reason: "right");
-        expect(actual.bottom, closeTo(expectedContentRect.bottom,0.1), reason: "bottom");
-        expect(actual.top, closeTo(expectedContentRect.top,0.1), reason: "top");
+        expect(actual.left, closeTo(expectedContentRect.left, 0.1),
+            reason: "left");
+        expect(actual.right, closeTo(expectedContentRect.right, 0.1),
+            reason: "right");
+        expect(actual.bottom, closeTo(expectedContentRect.bottom, 0.1),
+            reason: "bottom");
+        expect(actual.top, closeTo(expectedContentRect.top, 0.1),
+            reason: "top");
       });
     };
-    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.topCenter,
-        
-        Rect.fromLTRB(0, 76, 180, 205));
-    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.topLeft,
-        
-        Rect.fromLTRB(0, 76.0, 180, 205));
-    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.topRight,
-        
-        Rect.fromLTRB(0, 76, 180, 205));
-    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.bottomCenter,
-        
-        Rect.fromLTRB(0, 3795, 180, 3924));
-    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.bottomLeft,
-        
-        Rect.fromLTRB(0, 3795, 180, 3924));
-    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.bottomRight,
-        
-        Rect.fromLTRB(0, 3795, 180, 3924));
+    builder("", OverflowMode.clipContent, ContentLocation.below,
+        Alignment.topCenter, Rect.fromLTRB(0, 76, 180, 205));
+    builder("", OverflowMode.clipContent, ContentLocation.below,
+        Alignment.topLeft, Rect.fromLTRB(0, 76.0, 180, 205));
+    builder("", OverflowMode.clipContent, ContentLocation.below,
+        Alignment.topRight, Rect.fromLTRB(0, 76, 180, 205));
+    builder("", OverflowMode.clipContent, ContentLocation.above,
+        Alignment.bottomCenter, Rect.fromLTRB(0, 3795, 180, 3924));
+    builder("", OverflowMode.clipContent, ContentLocation.above,
+        Alignment.bottomLeft, Rect.fromLTRB(0, 3795, 180, 3924));
+    builder("", OverflowMode.clipContent, ContentLocation.above,
+        Alignment.bottomRight, Rect.fromLTRB(0, 3795, 180, 3924));
 
-    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.center,
-        
-        Rect.fromLTRB(0, 1807, 180, 1936));
-    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.centerLeft,
-        
-        Rect.fromLTRB(0, 1807, 180, 1936));
-    builder("", OverflowMode.clipContent, ContentLocation.above, Alignment.centerRight,
-        
-        Rect.fromLTRB(0, 1807, 180, 1936));
+    builder("", OverflowMode.clipContent, ContentLocation.above,
+        Alignment.center, Rect.fromLTRB(0, 1807, 180, 1936));
+    builder("", OverflowMode.clipContent, ContentLocation.above,
+        Alignment.centerLeft, Rect.fromLTRB(0, 1807, 180, 1936));
+    builder("", OverflowMode.clipContent, ContentLocation.above,
+        Alignment.centerRight, Rect.fromLTRB(0, 1807, 180, 1936));
 
-    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.center,
-        
-        Rect.fromLTRB(0, 2064, 180, 2193));
-    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.centerLeft,
-        
-        Rect.fromLTRB(0, 2064, 180, 2193));
-    builder("", OverflowMode.clipContent, ContentLocation.below, Alignment.centerRight,
-        
-        Rect.fromLTRB(0, 2064, 180, 2193));
+    builder("", OverflowMode.clipContent, ContentLocation.below,
+        Alignment.center, Rect.fromLTRB(0, 2064, 180, 2193));
+    builder("", OverflowMode.clipContent, ContentLocation.below,
+        Alignment.centerLeft, Rect.fromLTRB(0, 2064, 180, 2193));
+    builder("", OverflowMode.clipContent, ContentLocation.below,
+        Alignment.centerRight, Rect.fromLTRB(0, 2064, 180, 2193));
+    builder("", OverflowMode.clipContent, ContentLocation.center,
+        Alignment.center, Rect.fromLTRB(0, 1903.5, 138, 2032.5));
+    builder("", OverflowMode.clipContent, ContentLocation.center,
+        Alignment.centerLeft, Rect.fromLTRB(24.0, 1903.5, 204, 2032.5));
+    builder("", OverflowMode.clipContent, ContentLocation.center,
+        Alignment.centerRight, Rect.fromLTRB(0, 1903.5, 180, 2032.5));
   });
 }
